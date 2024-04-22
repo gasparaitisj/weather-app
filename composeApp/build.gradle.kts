@@ -74,6 +74,8 @@ kotlin {
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.xmlutil.core)
+            implementation(libs.xmlutil.serialization)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
