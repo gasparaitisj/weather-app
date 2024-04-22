@@ -22,6 +22,8 @@ import com.justas.weather.core.domain.model.CommonForecast
 import com.justas.weather.core.domain.model.CommonForecastItem
 import com.justas.weather.core.domain.model.WindDirection
 import com.justas.weather.core.domain.repository.HomeState
+import com.justas.weather.core.util.double.round
+import com.justas.weather.core.util.double.toScaleString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -208,13 +210,13 @@ private fun WindView(
                     append(" ${direction.value}")
                 }
                 if (speed != null) {
-                    append(" $speed m/s")
+                    append(" ${speed.toScaleString(2)} m/s")
                 }
                 if (gust != null) {
                     if (speed != null || direction != null) {
                         append(",")
                     }
-                    append(" gust is $gust m/s")
+                    append(" gust is ${gust.toScaleString(2)} m/s")
                 }
             },
     )
@@ -222,8 +224,9 @@ private fun WindView(
 
 @Composable
 private fun PrecipitationView(totalPrecipitation: Double?) {
+    if (totalPrecipitation == null) return
     Text(
-        text = "Total precipitation is $totalPrecipitation mm",
+        text = "Total precipitation is ${totalPrecipitation.toScaleString(2)} mm",
     )
 }
 
@@ -231,7 +234,7 @@ private fun PrecipitationView(totalPrecipitation: Double?) {
 private fun PressureView(seaLevelPressure: Double?) {
     if (seaLevelPressure == null) return
     Text(
-        text = "Sea level pressure is $seaLevelPressure hPa",
+        text = "Sea level pressure is ${seaLevelPressure.toScaleString(1)} hPa",
     )
 }
 
@@ -239,7 +242,7 @@ private fun PressureView(seaLevelPressure: Double?) {
 private fun HumidityView(relativeHumidity: Double?) {
     if (relativeHumidity == null) return
     Text(
-        text = "Relative humidity is $relativeHumidity%",
+        text = "Relative humidity is ${relativeHumidity.toScaleString(2)}%",
     )
 }
 
@@ -255,7 +258,7 @@ private fun DescriptionView(description: String?) {
 private fun CloudView(cloudCover: Double?) {
     if (cloudCover == null) return
     Text(
-        text = "Cloud cover is $cloudCover%",
+        text = "Cloud cover is ${cloudCover.toScaleString(2)}%",
     )
 }
 
@@ -285,12 +288,12 @@ private fun TemperatureView(
 ) {
     if (airTemperature != null) {
         Text(
-            text = "Air temperature is $airTemperature °C.",
+            text = "Air temperature is ${airTemperature.round(1)} °C.",
         )
     }
     if (feelsLikeTemperature != null) {
         Text(
-            text = "Feels like $feelsLikeTemperature °C.",
+            text = "Feels like ${feelsLikeTemperature.round(1)} °C.",
         )
     }
 }
