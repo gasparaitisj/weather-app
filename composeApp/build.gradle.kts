@@ -76,6 +76,7 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.xmlutil.core)
             implementation(libs.xmlutil.serialization)
+            implementation(libs.bignum)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
