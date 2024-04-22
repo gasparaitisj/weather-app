@@ -14,9 +14,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class NOMForecastResponse(
     @SerialName("geometry")
-    val geometry: Geometry?,
+    val geometry: NOMGeometry?,
     @SerialName("properties")
-    val properties: Properties?,
+    val properties: NOMProperties?,
     @SerialName("type")
     val type: String?
 ) {
@@ -28,7 +28,7 @@ data class NOMForecastResponse(
                     CommonForecastItem(
                         airTemperature = instantDetails?.airTemperature,
                         cloudCover = instantDetails?.cloudAreaFraction,
-                        conditionCode = timeSeries.data?.next1Hours?.summary?.symbolCode.orEmpty(),
+                        condition = timeSeries.data?.next1Hours?.summary?.symbolCode.orEmpty(),
                         instant = timeSeries.time.toInstantOrNull(),
                         relativeHumidity = instantDetails?.relativeHumidity,
                         seaLevelPressure = instantDetails?.airPressureAtSeaLevel,
@@ -61,7 +61,7 @@ data class NOMForecastResponse(
 }
 
 @Serializable
-data class Geometry(
+data class NOMGeometry(
     @SerialName("coordinates")
     val coordinates: List<Double?>? = null,
     @SerialName("type")
@@ -69,31 +69,31 @@ data class Geometry(
 )
 
 @Serializable
-data class Properties(
+data class NOMProperties(
     @SerialName("meta")
-    val meta: Meta? = null,
+    val meta: NOMMeta? = null,
     @SerialName("timeseries")
-    val timeSeries: List<TimeSeries>? = null,
+    val timeSeries: List<NOMTimeSeries>? = null,
 )
 
 @Serializable
-data class Meta(
+data class NOMMeta(
     @SerialName("units")
-    val units: Units? = null,
+    val units: NOMUnits? = null,
     @SerialName("updated_at")
     val updatedAt: String? = null,
 )
 
 @Serializable
-data class TimeSeries(
+data class NOMTimeSeries(
     @SerialName("data")
-    val data: Data? = null,
+    val data: NOMData? = null,
     @SerialName("time")
     val time: String? = null,
 )
 
 @Serializable
-data class Units(
+data class NOMUnits(
     @SerialName("air_pressure_at_sea_level")
     val airPressureAtSeaLevel: String? = null,
     @SerialName("air_temperature")
@@ -111,27 +111,27 @@ data class Units(
 )
 
 @Serializable
-data class Data(
+data class NOMData(
     @SerialName("instant")
-    val instant: DetailsSummary? = null,
+    val instant: NOMDetailsSummary? = null,
     @SerialName("next_12_hours")
-    val next12Hours: DetailsSummary? = null,
+    val next12Hours: NOMDetailsSummary? = null,
     @SerialName("next_1_hours")
-    val next1Hours: DetailsSummary? = null,
+    val next1Hours: NOMDetailsSummary? = null,
     @SerialName("next_6_hours")
-    val next6Hours: DetailsSummary? = null,
+    val next6Hours: NOMDetailsSummary? = null,
 )
 
 @Serializable
-data class DetailsSummary(
+data class NOMDetailsSummary(
     @SerialName("details")
-    val details: Details? = null,
+    val details: NOMDetails? = null,
     @SerialName("summary")
-    val summary: Summary? = null,
+    val summary: NOMSummary? = null,
 )
 
 @Serializable
-data class Details(
+data class NOMDetails(
     @SerialName("air_pressure_at_sea_level")
     val airPressureAtSeaLevel: Double? = null,
     @SerialName("air_temperature")
@@ -149,7 +149,7 @@ data class Details(
 )
 
 @Serializable
-data class Summary(
+data class NOMSummary(
     @SerialName("symbol_code")
     val symbolCode: String? = null,
 )

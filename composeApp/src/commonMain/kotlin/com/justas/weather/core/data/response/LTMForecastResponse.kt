@@ -19,11 +19,11 @@ data class LTMForecastResponse(
     @SerialName("forecastCreationTimeUtc")
     val forecastCreationTimeUtc: String?,
     @SerialName("forecastTimestamps")
-    val forecastTimestamps: List<ForecastTimestamp?>?,
+    val forecastTimestamps: List<LTMForecastTimestamp?>?,
     @SerialName("forecastType")
     val forecastType: String?,
     @SerialName("place")
-    val place: Place?
+    val place: LTMPlace?
 ) {
     fun toModel(provider: String): CommonForecast {
         return CommonForecast(
@@ -32,7 +32,7 @@ data class LTMForecastResponse(
                     CommonForecastItem(
                         airTemperature = forecastTimestamp?.airTemperature,
                         cloudCover = forecastTimestamp?.cloudCover,
-                        conditionCode = forecastTimestamp?.conditionCode.orEmpty(),
+                        condition = forecastTimestamp?.conditionCode.orEmpty(),
                         feelsLikeTemperature = forecastTimestamp?.feelsLikeTemperature,
                         instant = forecastTimestamp?.forecastTimeUtc.toInstantOrNull(),
                         relativeHumidity = forecastTimestamp?.relativeHumidity,
@@ -66,7 +66,7 @@ data class LTMForecastResponse(
 }
 
 @Serializable
-data class ForecastTimestamp(
+data class LTMForecastTimestamp(
     @SerialName("airTemperature")
     val airTemperature: Double?,
     @SerialName("cloudCover")
@@ -92,13 +92,13 @@ data class ForecastTimestamp(
 )
 
 @Serializable
-data class Place(
+data class LTMPlace(
     @SerialName("administrativeDivision")
     val administrativeDivision: String?,
     @SerialName("code")
     val code: String?,
     @SerialName("coordinates")
-    val coordinates: Coordinates?,
+    val coordinates: LTMCoordinates?,
     @SerialName("country")
     val country: String?,
     @SerialName("countryCode")
@@ -108,7 +108,7 @@ data class Place(
 )
 
 @Serializable
-data class Coordinates(
+data class LTMCoordinates(
     @SerialName("latitude")
     val latitude: Double?,
     @SerialName("longitude")

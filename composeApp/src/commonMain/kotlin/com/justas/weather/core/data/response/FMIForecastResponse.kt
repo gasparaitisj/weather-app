@@ -31,7 +31,7 @@ data class FMIForecastResponse(
                         CommonForecastItem(
                             airTemperature = parameters[0],
                             cloudCover = parameters[1],
-                            conditionCode = "",
+                            condition = "",
                             feelsLikeTemperature = null,
                             instant = instant,
                             relativeHumidity = parameters[2],

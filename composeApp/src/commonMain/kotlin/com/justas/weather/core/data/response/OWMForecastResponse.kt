@@ -33,7 +33,7 @@ data class OWMForecastResponse(
                     CommonForecastItem(
                         airTemperature = item?.main?.temp,
                         cloudCover = item?.clouds?.all,
-                        conditionCode = item?.weather?.firstOrNull()?.description.orEmpty(),
+                        condition = item?.weather?.firstOrNull()?.description.orEmpty(),
                         instant = item?.dtTxt.toInstantOrNull(),
                         feelsLikeTemperature = item?.main?.feelsLike,
                         relativeHumidity = item?.main?.humidity,
