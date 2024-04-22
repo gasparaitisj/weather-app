@@ -8,6 +8,7 @@ import com.justas.weather.core.data.network.FMIApi
 import com.justas.weather.core.data.network.LTMApi
 import com.justas.weather.core.data.network.NOMApi
 import com.justas.weather.core.data.network.OWMApi
+import com.justas.weather.core.data.network.SMHIApi
 import com.justas.weather.core.domain.repository.WeatherRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -37,6 +38,7 @@ object ServiceLocator {
                     owmApi,
                     nomApi,
                     fmiApi,
+                    smhiApi,
                 ),
         )
     }
@@ -49,6 +51,9 @@ object ServiceLocator {
     }
     private val ltmApi: LTMApi by lazy {
         LTMApi(httpClient)
+    }
+    private val smhiApi: SMHIApi by lazy {
+        SMHIApi(httpClient)
     }
 
     private val fmiApi: FMIApi by lazy {
