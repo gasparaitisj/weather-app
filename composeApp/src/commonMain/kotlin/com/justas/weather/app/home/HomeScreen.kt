@@ -174,7 +174,7 @@ private fun ForecastItem(
             cloudCover = item.cloudCover,
         )
         DescriptionView(
-            description = item.conditionCode,
+            description = item.condition,
         )
         HumidityView(
             relativeHumidity = item.relativeHumidity,
@@ -245,7 +245,7 @@ private fun HumidityView(relativeHumidity: Double?) {
 
 @Composable
 private fun DescriptionView(description: String?) {
-    if (description == null) return
+    if (description.isNullOrBlank()) return
     Text(
         text = "Weather condition is $description",
     )
@@ -264,7 +264,7 @@ private fun ProviderView(
     provider: String?,
     modifier: Modifier = Modifier,
 ) {
-    if (provider == null) return
+    if (provider.isNullOrBlank()) return
     Text(
         modifier =
             Modifier
