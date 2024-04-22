@@ -16,7 +16,7 @@ data class CommonForecast(
 data class CommonForecastItem(
     val airTemperature: Double? = null,
     val cloudCover: Double? = null,
-    val conditionCode: String = "",
+    val condition: String = "",
     val feelsLikeTemperature: Double? = null,
     val instant: Instant? = null,
     val relativeHumidity: Double? = null,
