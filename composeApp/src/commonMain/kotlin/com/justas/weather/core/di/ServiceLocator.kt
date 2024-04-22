@@ -4,6 +4,7 @@ import co.touchlab.kermit.Logger as KermitLogger
 import io.ktor.client.plugins.logging.Logger as KtorLogger
 import co.touchlab.kermit.loggerConfigInit
 import co.touchlab.kermit.platformLogWriter
+import com.justas.weather.core.data.network.DMIApi
 import com.justas.weather.core.data.network.FMIApi
 import com.justas.weather.core.data.network.LTMApi
 import com.justas.weather.core.data.network.NOMApi
@@ -39,6 +40,7 @@ object ServiceLocator {
                     nomApi,
                     fmiApi,
                     smhiApi,
+                    dmiApi,
                 ),
         )
     }
@@ -55,7 +57,9 @@ object ServiceLocator {
     private val smhiApi: SMHIApi by lazy {
         SMHIApi(httpClient)
     }
-
+    private val dmiApi: DMIApi by lazy {
+        DMIApi(httpClient)
+    }
     private val fmiApi: FMIApi by lazy {
         FMIApi(httpClient, xmlUtil)
     }
@@ -74,6 +78,7 @@ object ServiceLocator {
             install(ContentNegotiation) {
                 json(
                     Json {
+                        isLenient = true
                         ignoreUnknownKeys = true
                         useAlternativeNames = false
                         explicitNulls = false
