@@ -24,6 +24,9 @@ ktlint_function_naming_ignore_when_annotated_with = Composable
 
 ktlint_standard_trailing-comma-on-declaration-site = disabled
 
+# Named imports do not work correctly
+ktlint_standard_import-ordering = disabled
+
 [{*.kt,*.kts}]
 
 ij_visual_guides = none
