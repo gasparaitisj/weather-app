@@ -1,7 +1,7 @@
 package com.justas.weather.core.domain.model
 
 // Sorted in clockwise order
-enum class WindDirection(val value: String) {
+enum class CommonWindDirection(val value: String) {
     NORTH("N"),
     NORTHEAST("NE"),
     EAST("E"),
@@ -12,7 +12,7 @@ enum class WindDirection(val value: String) {
     NORTHWEST("NW");
 
     companion object {
-        fun getDirection(degrees: Int?): WindDirection? {
+        fun getDirection(degrees: Int?): CommonWindDirection? {
             if (degrees == null) return null
             val percentageForDirection = 360.0 / entries.size
             val offset = percentageForDirection / 2
