@@ -12,7 +12,7 @@ class BottomBarViewModel : ViewModel() {
     fun onItemSelected(item: BottomBarItem) {
         _state.update { uiState ->
             uiState.copy(
-                selectedItem = item
+                selectedItem = item,
             )
         }
     }

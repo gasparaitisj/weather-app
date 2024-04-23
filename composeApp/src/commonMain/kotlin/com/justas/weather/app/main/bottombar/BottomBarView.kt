@@ -21,8 +21,9 @@ fun MainBottomBar(
     onItemClick: (BottomBarItem) -> Unit = {},
 ) {
     BottomAppBar(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier =
+            Modifier
+                .fillMaxWidth(),
         containerColor = MaterialTheme.colorScheme.primaryContainer,
     ) {
         items.forEach { item ->
@@ -39,18 +40,18 @@ fun MainBottomBar(
                 label = {
                     Text(
                         text = item.name,
-                        style = AppTypography.labelMedium
+                        style = AppTypography.labelMedium,
                     )
                 },
                 alwaysShowLabel = false,
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.Black,
-                    selectedTextColor = Color.Black,
-                    unselectedIconColor = Color.Black,
-                    unselectedTextColor = Color.Black,
-                ),
+                colors =
+                    NavigationBarItemDefaults.colors(
+                        selectedIconColor = Color.Black,
+                        selectedTextColor = Color.Black,
+                        unselectedIconColor = Color.Black,
+                        unselectedTextColor = Color.Black,
+                    ),
             )
-
         }
     }
 }
