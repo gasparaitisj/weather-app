@@ -1,4 +1,4 @@
-package com.justas.weather.app.main
+package com.justas.weather.app.main.topbar
 
 import com.justas.weather.core.domain.model.CommonPlace
 import kotlinx.collections.immutable.PersistentList

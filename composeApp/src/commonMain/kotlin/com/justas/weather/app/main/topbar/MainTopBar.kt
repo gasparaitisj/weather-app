@@ -1,4 +1,4 @@
-package com.justas.weather.app.main
+package com.justas.weather.app.main.topbar
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

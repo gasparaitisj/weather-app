@@ -1,4 +1,4 @@
-package com.justas.weather.app.main
+package com.justas.weather.app.main.topbar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
