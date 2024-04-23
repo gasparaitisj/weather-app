@@ -4,16 +4,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.justas.weather.core.data.network.ltm.LTMPlacesApi
 import com.justas.weather.core.domain.model.CommonPlace
+import com.justas.weather.core.domain.repository.ForecastRepository
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class MainTopBarViewModel(
+class TopBarViewModel(
     private val placesApi: LTMPlacesApi,
+    private val forecastRepository: ForecastRepository,
 ) : ViewModel() {
-    private val _state = MutableStateFlow(MainTopBarState())
+    private val _state = MutableStateFlow(TopBarState())
     val state = _state.asStateFlow()
 
     init {
@@ -24,36 +26,28 @@ class MainTopBarViewModel(
         viewModelScope.launch {
             _state.update { uiState ->
                 val places = placesApi.getPlaces().toPersistentList()
-                val place = places.firstOrNull() ?: CommonPlace()
                 uiState.copy(
                     places = places,
-                    selectedPlace = place,
                 )
             }
         }
     }
 
-    fun onPlaceSelected(place: CommonPlace) {
-        _state.update { uiState ->
-            uiState.copy(
-                selectedPlace = place,
-            )
-        }
-    }
-
-    fun onDropdownMenuExpandedChange(isExpanded: Boolean) {
-        _state.update { uiState ->
-            uiState.copy(
-                isDropdownMenuExpanded = isExpanded,
-            )
-        }
-    }
-
-    fun onDropdownMenuTextFieldValueChange(value: String) {
-        _state.update { uiState ->
-            uiState.copy(
-                dropdownMenuTextFieldValue = value,
-            )
+    fun onPlaceSelected(place: CommonPlace?) {
+        if (place == null) return
+        viewModelScope.launch {
+            _state.update { uiState ->
+                uiState.copy(
+                    selectedPlace = CommonPlace(name = place.name),
+                )
+            }
+            val placeWithCoordinates = placesApi.getPlaceByCode(place.code)
+            _state.update { uiState ->
+                uiState.copy(
+                    selectedPlace = place,
+                )
+            }
+            forecastRepository.onRefresh(placeWithCoordinates)
         }
     }
 }

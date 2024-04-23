@@ -17,13 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.justas.weather.app.theme.AppTypography
+import com.justas.weather.app.main.theme.AppTypography
 import com.justas.weather.core.domain.model.CommonForecast
 import com.justas.weather.core.domain.model.CommonForecastItem
 import com.justas.weather.core.domain.model.CommonWindDirection
-import com.justas.weather.core.domain.repository.WeatherState
+import com.justas.weather.core.domain.repository.ForecastState
 import com.justas.weather.core.util.double.round
 import com.justas.weather.core.util.double.toScaleString
+import kotlin.math.roundToInt
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -31,7 +32,7 @@ import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun HomeScreen(
-    state: WeatherState,
+    state: ForecastState,
     modifier: Modifier = Modifier
 ) {
     HomeContent(
@@ -48,7 +49,7 @@ fun HomeScreen(
 
 @Composable
 private fun HomeContent(
-    state: WeatherState,
+    state: ForecastState,
     modifier: Modifier = Modifier,
 ) {
     HomeLazyColumn(
@@ -132,7 +133,7 @@ private fun HomeLoadingView(
 }
 
 @Composable
-private fun HomeLazyRow(
+fun HomeLazyRow(
     items: ImmutableList<CommonForecastItem>,
     modifier: Modifier = Modifier,
 ) {
@@ -197,7 +198,7 @@ private fun ForecastItem(
 
 @Composable
 private fun WindView(
-    direction: CommonWindDirection?,
+    direction: Double?,
     gust: Double?,
     speed: Double?,
 ) {
@@ -207,7 +208,7 @@ private fun WindView(
             buildString {
                 append("Wind is")
                 if (direction != null) {
-                    append(" ${direction.value}")
+                    append(" ${CommonWindDirection.getDirection(direction.roundToInt())}")
                 }
                 if (speed != null) {
                     append(" ${speed.toScaleString(2)} m/s")

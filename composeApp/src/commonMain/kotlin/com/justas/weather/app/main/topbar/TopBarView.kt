@@ -1,5 +1,6 @@
 package com.justas.weather.app.main.topbar
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,18 +17,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.justas.weather.app.home.DropDownMenuBox
-import com.justas.weather.app.theme.AppTypography
+import com.justas.weather.app.home.TextFieldMenu
+import com.justas.weather.app.main.theme.AppTypography
 import com.justas.weather.core.domain.model.CommonPlace
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class,
+)
 @Composable
 fun MainTopBar(
-    state: MainTopBarState,
+    state: TopBarState,
     modifier: Modifier = Modifier,
-    onItemSelected: (CommonPlace) -> Unit = {},
-    onExpandedChange: (Boolean) -> Unit = {},
-    onTextFieldValueChange: (String) -> Unit = {},
+    onItemSelected: (CommonPlace?) -> Unit = {},
     onRefresh: () -> Unit = {},
 ) {
     TopAppBar(
@@ -42,15 +44,22 @@ fun MainTopBar(
                 actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             ),
         title = {
-            DropDownMenuBox(
-                items = state.places,
-                selectedPlace = state.selectedPlace,
-                isExpanded = state.isDropdownMenuExpanded,
-                textFieldValue = state.dropdownMenuTextFieldValue,
-                modifier = modifier,
-                onItemSelected = onItemSelected,
-                onExpandedChange = onExpandedChange,
-                onTextFieldValueChange = onTextFieldValueChange,
+            TextFieldMenu(
+                modifier =
+                    Modifier
+                        .fillMaxWidth(0.5f),
+                label = "City",
+                options = state.places,
+                selectedOption = state.selectedPlace,
+                onOptionSelected = onItemSelected,
+                optionToString = { place: CommonPlace ->
+                    place.name
+                },
+                filteredOptions = { searchInput: String ->
+                    state.places.filter { place ->
+                        place.name.startsWith(searchInput, ignoreCase = true)
+                    }.take(10)
+                },
             )
         },
         actions = { MainRefreshIconButton(onRefresh = onRefresh) },

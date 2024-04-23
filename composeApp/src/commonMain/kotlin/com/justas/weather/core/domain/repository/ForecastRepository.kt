@@ -21,7 +21,7 @@ import kotlinx.datetime.Clock
 class ForecastRepository(
     private val forecastApis: ImmutableList<ForecastApi>,
 ) {
-    private val _state = MutableStateFlow(WeatherState())
+    private val _state = MutableStateFlow(ForecastState())
     val state = _state.asStateFlow()
 
     private val supervisor = SupervisorJob()
@@ -30,9 +30,18 @@ class ForecastRepository(
             log.e { exception.stackTraceToString() }
         }
 
-    fun onRefresh() {
+    fun onRefresh(place: CommonPlace) {
+        if (place.validity.isNotEmpty()) return
         initializeForecastsByApiName()
-        fetchAllForecasts(CommonPlace.VILNIUS)
+        fetchAllForecasts(place)
+    }
+
+    private val CommonPlace.validity get(): String {
+        return if (name.isBlank()) {
+            "The place is invalid"
+        } else {
+            ""
+        }
     }
 
     private fun initializeForecastsByApiName() {

@@ -1,8 +1,6 @@
 package com.justas.weather.core.data.response
 import com.justas.weather.core.domain.model.CommonForecast
 import com.justas.weather.core.domain.model.CommonForecastItem
-import com.justas.weather.core.domain.model.CommonWindDirection
-import kotlin.math.roundToInt
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
@@ -34,10 +32,7 @@ data class NOMForecastResponse(
                         seaLevelPressure = instantDetails?.airPressureAtSeaLevel,
                         totalPrecipitation =
                             timeSeries.data?.next1Hours?.details?.precipitationAmount,
-                        windDirection =
-                            CommonWindDirection.getDirection(
-                                instantDetails?.windFromDirection?.roundToInt(),
-                            ),
+                        windDirection = instantDetails?.windFromDirection,
                         windSpeed = instantDetails?.windSpeed,
                     )
                 }.orEmpty().toPersistentList(),

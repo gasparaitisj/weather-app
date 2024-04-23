@@ -93,7 +93,7 @@ object ServiceLocator {
                 logger =
                     object : KtorLogger {
                         override fun log(message: String) {
-                            log.i(tag = "HTTP") { message.replace("\n", " ") }
+                            // log.i(tag = "HTTP") { message.replace("\n", " ") }
                         }
                     }
                 level = LogLevel.BODY
