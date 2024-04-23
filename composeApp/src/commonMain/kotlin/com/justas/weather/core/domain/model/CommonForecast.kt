@@ -22,7 +22,7 @@ data class CommonForecastItem(
     val relativeHumidity: Double? = null,
     val seaLevelPressure: Double? = null,
     val totalPrecipitation: Double? = null,
-    val windDirection: WindDirection? = null,
+    val windDirection: CommonWindDirection? = null,
     val windGust: Double? = null,
     val windSpeed: Double? = null,
 )
