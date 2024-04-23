@@ -1,6 +1,4 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -10,24 +8,24 @@ plugins {
 }
 
 kotlin {
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        moduleName = "composeApp"
-        browser {
-            commonWebpackConfig {
-                outputFileName = "composeApp.js"
-                devServer =
-                    (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                        static =
-                            (static ?: mutableListOf()).apply {
-                                // Serve sources to debug inside browser
-                                add(project.projectDir.path)
-                            }
-                    }
-            }
-        }
-        binaries.executable()
-    }
+//    @OptIn(ExperimentalWasmDsl::class)
+//    wasmJs {
+//        moduleName = "composeApp"
+//        browser {
+//            commonWebpackConfig {
+//                outputFileName = "composeApp.js"
+//                devServer =
+//                    (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+//                        static =
+//                            (static ?: mutableListOf()).apply {
+//                                // Serve sources to debug inside browser
+//                                add(project.projectDir.path)
+//                            }
+//                    }
+//            }
+//        }
+//        binaries.executable()
+//    }
 
     androidTarget {
         compilations.all {
@@ -47,6 +45,12 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+        }
+    }
+    configurations {
+        all {
+            // For usage of libs.androidx.lifecycle.viewmodel
+            exclude(group = "androidx.lifecycle", module = "lifecycle-viewmodel-ktx")
         }
     }
 
@@ -77,11 +81,13 @@ kotlin {
             implementation(libs.xmlutil.core)
             implementation(libs.xmlutil.serialization)
             implementation(libs.bignum)
+            implementation(libs.androidx.lifecycle.viewmodel)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
         desktopMain.dependencies {
+            implementation(libs.kotlinx.coroutines.swing)
             implementation(compose.desktop.currentOs)
             implementation(libs.ktor.client.java)
         }
