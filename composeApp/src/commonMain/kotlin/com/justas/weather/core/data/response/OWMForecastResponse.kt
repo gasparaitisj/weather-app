@@ -1,7 +1,7 @@
 package com.justas.weather.core.data.response
 import com.justas.weather.core.domain.model.CommonForecast
 import com.justas.weather.core.domain.model.CommonForecastItem
-import com.justas.weather.core.domain.model.WindDirection
+import com.justas.weather.core.domain.model.CommonWindDirection
 import kotlin.math.roundToInt
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.Instant
@@ -40,7 +40,7 @@ data class OWMForecastResponse(
                         seaLevelPressure = item?.main?.pressure,
                         totalPrecipitation = item?.pop,
                         windDirection =
-                            WindDirection.getDirection(
+                            CommonWindDirection.getDirection(
                                 item?.wind?.deg?.roundToInt(),
                             ),
                         windGust = item?.wind?.gust,

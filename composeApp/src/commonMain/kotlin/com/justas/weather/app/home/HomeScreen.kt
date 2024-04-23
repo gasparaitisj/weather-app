@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import com.justas.weather.app.theme.AppTypography
 import com.justas.weather.core.domain.model.CommonForecast
 import com.justas.weather.core.domain.model.CommonForecastItem
-import com.justas.weather.core.domain.model.WindDirection
-import com.justas.weather.core.domain.repository.HomeState
+import com.justas.weather.core.domain.model.CommonWindDirection
+import com.justas.weather.core.domain.repository.WeatherState
 import com.justas.weather.core.util.double.round
 import com.justas.weather.core.util.double.toScaleString
 import kotlinx.collections.immutable.ImmutableList
@@ -31,7 +31,7 @@ import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun HomeScreen(
-    state: HomeState,
+    state: WeatherState,
     modifier: Modifier = Modifier
 ) {
     HomeContent(
@@ -48,7 +48,7 @@ fun HomeScreen(
 
 @Composable
 private fun HomeContent(
-    state: HomeState,
+    state: WeatherState,
     modifier: Modifier = Modifier,
 ) {
     HomeLazyColumn(
@@ -197,7 +197,7 @@ private fun ForecastItem(
 
 @Composable
 private fun WindView(
-    direction: WindDirection?,
+    direction: CommonWindDirection?,
     gust: Double?,
     speed: Double?,
 ) {

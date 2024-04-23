@@ -2,7 +2,7 @@ package com.justas.weather.core.data.response
 
 import com.justas.weather.core.domain.model.CommonForecast
 import com.justas.weather.core.domain.model.CommonForecastItem
-import com.justas.weather.core.domain.model.WindDirection
+import com.justas.weather.core.domain.model.CommonWindDirection
 import kotlin.math.roundToInt
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.Instant
@@ -39,7 +39,7 @@ data class LTMForecastResponse(
                         seaLevelPressure = forecastTimestamp?.seaLevelPressure,
                         totalPrecipitation = forecastTimestamp?.totalPrecipitation,
                         windDirection =
-                            WindDirection.getDirection(
+                            CommonWindDirection.getDirection(
                                 forecastTimestamp?.windDirection?.roundToInt(),
                             ),
                         windGust = forecastTimestamp?.windGust,

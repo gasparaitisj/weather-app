@@ -2,7 +2,7 @@ package com.justas.weather.core.data.response
 
 import com.justas.weather.core.domain.model.CommonForecast
 import com.justas.weather.core.domain.model.CommonForecastItem
-import com.justas.weather.core.domain.model.WindDirection
+import com.justas.weather.core.domain.model.CommonWindDirection
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.PersistentList
@@ -38,7 +38,7 @@ data class FMIForecastResponse(
                             seaLevelPressure = parameters[3],
                             totalPrecipitation = parameters[4],
                             windDirection =
-                                WindDirection.getDirection(
+                                CommonWindDirection.getDirection(
                                     parameters[5].roundToInt(),
                                 ),
                             windGust = parameters[6],

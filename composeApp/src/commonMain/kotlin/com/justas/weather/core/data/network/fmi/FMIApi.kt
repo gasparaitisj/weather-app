@@ -1,7 +1,9 @@
-package com.justas.weather.core.data.network
+package com.justas.weather.core.data.network.fmi
 
+import com.justas.weather.core.data.network.ForecastApi
 import com.justas.weather.core.data.response.FMIForecastResponse
 import com.justas.weather.core.domain.model.CommonForecast
+import com.justas.weather.core.domain.model.CommonPlace
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
@@ -12,14 +14,11 @@ import nl.adaptivity.xmlutil.serialization.XML
 class FMIApi(
     private val httpClient: HttpClient,
     private val xmlUtil: XML,
-) : CommonApi {
+) : ForecastApi {
     override val name: String
         get() = "Finnish Meteorological Institute"
 
-    override suspend fun getForecast(
-        latLon: Pair<Double, Double>?,
-        name: String?,
-    ): CommonForecast =
+    override suspend fun getForecast(place: CommonPlace): CommonForecast =
         httpClient.get {
             url("http://opendata.fmi.fi/wfs")
             parameter("service", "WFS")
@@ -29,10 +28,19 @@ class FMIApi(
                 "storedquery_id",
                 "fmi::forecast::harmonie::surface::point::multipointcoverage",
             )
-            parameter("latlon", "${latLon?.first},${latLon?.second}")
+            parameter("latlon", "${place.coordinates.latitude},${place.coordinates.longitude}")
             parameter(
                 "parameters",
-                "temperature,totalcloudcover,humidity,pressure,precipitation1h,winddirection,windgust,windspeedms",
+                buildString {
+                    append("temperature,")
+                    append("totalcloudcover,")
+                    append("humidity,")
+                    append("pressure,")
+                    append("precipitation1h,")
+                    append("winddirection,")
+                    append("windgust,")
+                    append("windspeedms")
+                },
             )
         }.run {
             val body = bodyAsText()

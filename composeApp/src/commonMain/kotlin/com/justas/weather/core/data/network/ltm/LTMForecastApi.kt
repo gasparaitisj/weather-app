@@ -1,23 +1,22 @@
-package com.justas.weather.core.data.network
+package com.justas.weather.core.data.network.ltm
 
+import com.justas.weather.core.data.network.ForecastApi
 import com.justas.weather.core.data.response.LTMForecastResponse
 import com.justas.weather.core.domain.model.CommonForecast
+import com.justas.weather.core.domain.model.CommonPlace
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.url
 
-class LTMApi(
+class LTMForecastApi(
     private val httpClient: HttpClient,
-) : CommonApi {
+) : ForecastApi {
     override val name: String
         get() = "Lithuanian Hydrometeorological Service under the Ministry of Environment"
 
-    override suspend fun getForecast(
-        latLon: Pair<Double, Double>?,
-        name: String?,
-    ): CommonForecast =
+    override suspend fun getForecast(place: CommonPlace): CommonForecast =
         httpClient.get {
-            url("https://api.meteo.lt/v1/places/$name/forecasts/long-term")
+            url("https://api.meteo.lt/v1/places/${place.name}/forecasts/long-term")
         }.body<LTMForecastResponse>().toModel(this.name)
 }

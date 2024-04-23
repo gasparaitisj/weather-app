@@ -9,11 +9,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.justas.weather.app.home.HomeScreen
-import com.justas.weather.core.di.ServiceLocator.weatherRepository
+import com.justas.weather.core.domain.repository.ForecastRepository
 
 @Composable
-fun MainScaffold(modifier: Modifier = Modifier) {
-    val state by weatherRepository.state.collectAsState()
+fun MainScaffold(
+    forecastRepository: ForecastRepository,
+    mainTopBarViewModel: MainTopBarViewModel,
+    modifier: Modifier = Modifier,
+) {
+    val state by forecastRepository.state.collectAsState()
+    val mainTopBarState by mainTopBarViewModel.state.collectAsState()
     Scaffold(
         modifier =
             Modifier
@@ -22,7 +27,11 @@ fun MainScaffold(modifier: Modifier = Modifier) {
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             MainTopBar(
-                onRefresh = weatherRepository::onRefresh,
+                state = mainTopBarState,
+                onItemSelected = mainTopBarViewModel::onPlaceSelected,
+                onExpandedChange = mainTopBarViewModel::onDropdownMenuExpandedChange,
+                onTextFieldValueChange = mainTopBarViewModel::onDropdownMenuTextFieldValueChange,
+                onRefresh = forecastRepository::onRefresh,
             )
         },
     ) { paddingValues ->

@@ -4,13 +4,14 @@ import co.touchlab.kermit.Logger as KermitLogger
 import io.ktor.client.plugins.logging.Logger as KtorLogger
 import co.touchlab.kermit.loggerConfigInit
 import co.touchlab.kermit.platformLogWriter
-import com.justas.weather.core.data.network.DMIApi
-import com.justas.weather.core.data.network.FMIApi
-import com.justas.weather.core.data.network.LTMApi
-import com.justas.weather.core.data.network.NOMApi
-import com.justas.weather.core.data.network.OWMApi
-import com.justas.weather.core.data.network.SMHIApi
-import com.justas.weather.core.domain.repository.WeatherRepository
+import com.justas.weather.core.data.network.dmi.DMIApi
+import com.justas.weather.core.data.network.fmi.FMIApi
+import com.justas.weather.core.data.network.ltm.LTMForecastApi
+import com.justas.weather.core.data.network.ltm.LTMPlacesApi
+import com.justas.weather.core.data.network.nom.NOMApi
+import com.justas.weather.core.data.network.owm.OWMApi
+import com.justas.weather.core.data.network.smhi.SMHIApi
+import com.justas.weather.core.domain.repository.ForecastRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
@@ -31,11 +32,11 @@ import nl.adaptivity.xmlutil.serialization.structure.XmlDescriptor
 object ServiceLocator {
     val log: KermitLogger by lazy { createLogger() }
 
-    val weatherRepository: WeatherRepository by lazy {
-        WeatherRepository(
-            api =
+    val forecastRepository: ForecastRepository by lazy {
+        ForecastRepository(
+            forecastApis =
                 persistentListOf(
-                    ltmApi,
+                    ltmForecastApi,
                     owmApi,
                     nomApi,
                     fmiApi,
@@ -51,8 +52,8 @@ object ServiceLocator {
     private val owmApi: OWMApi by lazy {
         OWMApi(httpClient)
     }
-    private val ltmApi: LTMApi by lazy {
-        LTMApi(httpClient)
+    private val ltmForecastApi: LTMForecastApi by lazy {
+        LTMForecastApi(httpClient)
     }
     private val smhiApi: SMHIApi by lazy {
         SMHIApi(httpClient)
@@ -62,6 +63,9 @@ object ServiceLocator {
     }
     private val fmiApi: FMIApi by lazy {
         FMIApi(httpClient, xmlUtil)
+    }
+    val ltmPlacesApi: LTMPlacesApi by lazy {
+        LTMPlacesApi(httpClient)
     }
 
     private val httpClient: HttpClient by lazy {
