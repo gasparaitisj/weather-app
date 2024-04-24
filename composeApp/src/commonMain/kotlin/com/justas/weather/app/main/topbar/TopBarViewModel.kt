@@ -36,15 +36,10 @@ class TopBarViewModel(
     fun onPlaceSelected(place: CommonPlace?) {
         if (place == null) return
         viewModelScope.launch {
-            _state.update { uiState ->
-                uiState.copy(
-                    selectedPlace = CommonPlace(name = place.name),
-                )
-            }
             val placeWithCoordinates = placesApi.getPlaceByCode(place.code)
             _state.update { uiState ->
                 uiState.copy(
-                    selectedPlace = place,
+                    selectedPlace = placeWithCoordinates,
                 )
             }
             forecastRepository.onRefresh(placeWithCoordinates)
