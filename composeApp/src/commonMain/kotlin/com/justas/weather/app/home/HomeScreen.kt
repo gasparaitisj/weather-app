@@ -189,7 +189,7 @@ private fun ForecastItem(
             totalPrecipitation = item.totalPrecipitation,
         )
         WindView(
-            direction = item.windDirection,
+            direction = CommonWindDirection.getDirection(item.windDirection?.roundToInt())?.value,
             gust = item.windGust,
             speed = item.windSpeed,
         )
@@ -198,17 +198,17 @@ private fun ForecastItem(
 
 @Composable
 private fun WindView(
-    direction: Double?,
+    direction: String?,
     gust: Double?,
     speed: Double?,
 ) {
-    if (direction == null && gust == null && speed == null) return
+    if (direction.isNullOrBlank() && gust == null && speed == null) return
     Text(
         text =
             buildString {
                 append("Wind is")
-                if (direction != null) {
-                    append(" ${CommonWindDirection.getDirection(direction.roundToInt())}")
+                if (!direction.isNullOrBlank()) {
+                    append(" $direction")
                 }
                 if (speed != null) {
                     append(" ${speed.toScaleString(2)} m/s")
