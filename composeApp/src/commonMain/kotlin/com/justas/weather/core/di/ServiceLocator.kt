@@ -93,7 +93,7 @@ object ServiceLocator {
                 logger =
                     object : KtorLogger {
                         override fun log(message: String) {
-                            // log.i(tag = "HTTP") { message.replace("\n", " ") }
+                            log.v(tag = "HTTP") { message.replace("\n", " ") }
                         }
                     }
                 level = LogLevel.BODY
@@ -121,6 +121,6 @@ object ServiceLocator {
     private fun createLogger() =
         KermitLogger(
             config = loggerConfigInit(platformLogWriter()),
-            tag = "App",
+            tag = "justas",
         )
 }
