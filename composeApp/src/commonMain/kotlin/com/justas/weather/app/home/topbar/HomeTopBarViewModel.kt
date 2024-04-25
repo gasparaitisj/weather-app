@@ -46,10 +46,16 @@ class HomeTopBarViewModel(
     fun onPlaceSelected(place: CommonPlace?) {
         if (place == null) return
         viewModelScope.launch {
+            _state.update { uiState ->
+                uiState.copy(
+                    isLoading = true,
+                )
+            }
             val placeWithCoordinates = placesApi.getPlaceByCode(place.code)
             _state.update { uiState ->
                 uiState.copy(
                     selectedPlace = placeWithCoordinates,
+                    isLoading = false,
                 )
             }
             forecastRepository.onRefresh(placeWithCoordinates)

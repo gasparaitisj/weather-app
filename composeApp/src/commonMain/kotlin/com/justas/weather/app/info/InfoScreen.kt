@@ -14,7 +14,12 @@ import com.justas.weather.app.main.forecast.ForecastLazyRow
 import com.justas.weather.app.main.forecast.ForecastLoadingView
 import com.justas.weather.app.main.forecast.ForecastProviderView
 import com.justas.weather.app.main.theme.AppTypography
+import com.justas.weather.core.domain.model.CommonDailyForecastItem
 import com.justas.weather.core.domain.model.CommonForecastItem
+import com.justas.weather.core.domain.model.CommonWindDirection
+import com.justas.weather.core.util.double.round
+import com.justas.weather.core.util.double.toScaleString
+import kotlin.math.roundToInt
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.datetime.LocalDate
 
@@ -29,7 +34,6 @@ fun InfoScreen(
                 start = 12.dp,
                 top = 12.dp,
             ).then(modifier),
-        forecastItemsByHour = infoState.averageForecastItemsByHour,
         forecastItemsByDay = infoState.averageForecastItemsByDay,
         isLoading = infoState.isLoading,
     )
@@ -37,8 +41,13 @@ fun InfoScreen(
 
 @Composable
 private fun InfoContent(
-    forecastItemsByHour: ImmutableList<CommonForecastItem>,
-    forecastItemsByDay: ImmutableList<Pair<LocalDate, ImmutableList<CommonForecastItem>>>,
+    forecastItemsByDay: ImmutableList<
+        Triple<
+            LocalDate,
+            ImmutableList<CommonForecastItem>,
+            CommonDailyForecastItem,
+        >,
+    >,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -54,7 +63,6 @@ private fun InfoContent(
             modifier =
                 Modifier
                     .then(modifier),
-            forecastItemsByHour = forecastItemsByHour,
             forecastItemsByDay = forecastItemsByDay,
         )
     }
@@ -62,8 +70,13 @@ private fun InfoContent(
 
 @Composable
 private fun InfoLazyColumn(
-    forecastItemsByHour: ImmutableList<CommonForecastItem>,
-    forecastItemsByDay: ImmutableList<Pair<LocalDate, ImmutableList<CommonForecastItem>>>,
+    forecastItemsByDay: ImmutableList<
+        Triple<
+            LocalDate,
+            ImmutableList<CommonForecastItem>,
+            CommonDailyForecastItem,
+        >,
+    >,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -93,9 +106,15 @@ private fun InfoLazyColumn(
                         ),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                val (dateTime, items) = forecastItemsByDay[index]
-                TimeView(
+                val (dateTime, items, dailyItem) = forecastItemsByDay[index]
+                InfoTimeView(
                     dateTime = dateTime,
+                )
+                DailyForecastItem(
+                    modifier =
+                        Modifier
+                            .align(Alignment.Start),
+                    item = dailyItem,
                 )
                 ForecastLazyRow(
                     modifier = Modifier.padding(top = 12.dp),
@@ -108,9 +127,164 @@ private fun InfoLazyColumn(
 }
 
 @Composable
-private fun TimeView(dateTime: LocalDate) {
+private fun InfoTimeView(dateTime: LocalDate) {
     Text(
         text = dateTime.toString(),
         style = AppTypography.titleLarge.copy(MaterialTheme.colorScheme.primary),
+    )
+}
+
+@Composable
+private fun DailyForecastItem(
+    item: CommonDailyForecastItem,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier =
+            Modifier
+                .then(modifier),
+    ) {
+        TemperatureView(
+            highAirTemperature = item.highAirTemperature,
+            lowAirTemperature = item.lowAirTemperature,
+            highFeelsLikeTemperature = item.highFeelsLikeTemperature,
+            lowFeelsLikeTemperature = item.lowFeelsLikeTemperature,
+        )
+        CloudView(
+            lowCloudCover = item.lowCloudCover,
+            highCloudCover = item.highCloudCover,
+        )
+        HumidityView(
+            lowRelativeHumidity = item.lowRelativeHumidity,
+            highRelativeHumidity = item.highRelativeHumidity,
+        )
+        PressureView(
+            lowSeaLevelPressure = item.lowSeaLevelPressure,
+            highSeaLevelPressure = item.highSeaLevelPressure,
+        )
+        PrecipitationView(
+            lowTotalPrecipitation = item.lowTotalPrecipitation,
+            highTotalPrecipitation = item.highTotalPrecipitation,
+        )
+        WindView(
+            direction =
+                CommonWindDirection.getDirection(
+                    item.averageWindDirection?.roundToInt(),
+                )?.value,
+            gust = item.averageWindGust,
+            speed = item.averageWindSpeed,
+        )
+    }
+}
+
+@Composable
+private fun TemperatureView(
+    highAirTemperature: Double?,
+    lowAirTemperature: Double?,
+    highFeelsLikeTemperature: Double?,
+    lowFeelsLikeTemperature: Double?,
+) {
+    Text(
+        text =
+            buildString {
+                append("Air temperature is ")
+                append("${highAirTemperature?.round(1)} °C / ")
+                append("${lowAirTemperature?.round(1)} °C")
+            },
+    )
+    Text(
+        text =
+            buildString {
+                append("Feels like ")
+                append("${highFeelsLikeTemperature?.round(1)} °C / ")
+                append("${lowFeelsLikeTemperature?.round(1)} °C")
+            },
+    )
+}
+
+@Composable
+private fun CloudView(
+    lowCloudCover: Double?,
+    highCloudCover: Double?,
+) {
+    Text(
+        text =
+            buildString {
+                append("Cloud cover is ")
+                append("${highCloudCover.toScaleString(2)} % / ")
+                append("${lowCloudCover.toScaleString(2)} %")
+            },
+    )
+}
+
+@Composable
+private fun HumidityView(
+    highRelativeHumidity: Double?,
+    lowRelativeHumidity: Double?,
+) {
+    Text(
+        text =
+            buildString {
+                append("Relative humidity is ")
+                append("${highRelativeHumidity.toScaleString(2)} % / ")
+                append("${lowRelativeHumidity.toScaleString(2)} %")
+            },
+    )
+}
+
+@Composable
+private fun PressureView(
+    highSeaLevelPressure: Double?,
+    lowSeaLevelPressure: Double?,
+) {
+    Text(
+        text =
+            buildString {
+                append("Relative humidity is ")
+                append("${highSeaLevelPressure.toScaleString(1)} hPa / ")
+                append("${lowSeaLevelPressure.toScaleString(1)} hPa")
+            },
+    )
+}
+
+@Composable
+private fun PrecipitationView(
+    highTotalPrecipitation: Double?,
+    lowTotalPrecipitation: Double?,
+) {
+    Text(
+        text =
+            buildString {
+                append("Total precipitation is ")
+                append("${highTotalPrecipitation.toScaleString(2)} mm / ")
+                append("${lowTotalPrecipitation.toScaleString(2)} mm")
+            },
+    )
+}
+
+@Composable
+private fun WindView(
+    direction: String?,
+    gust: Double?,
+    speed: Double?,
+) {
+    if (direction.isNullOrBlank() && gust == null && speed == null) return
+    Text(
+        text =
+            buildString {
+                append("Wind is")
+                if (!direction.isNullOrBlank()) {
+                    append(" $direction")
+                }
+                if (speed != null) {
+                    append(" ${speed.toScaleString(2)} m/s")
+                }
+                if (gust != null) {
+                    if (speed != null || direction != null) {
+                        append(",")
+                    }
+                    append(" gust is ${gust.toScaleString(2)} m/s")
+                }
+            },
     )
 }

@@ -2,6 +2,7 @@ package com.justas.weather.app.info
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.justas.weather.core.domain.model.CommonDailyForecastItem
 import com.justas.weather.core.domain.model.CommonForecast
 import com.justas.weather.core.domain.model.CommonForecastItem
 import com.justas.weather.core.domain.repository.ForecastRepository
@@ -62,17 +63,82 @@ class InfoViewModel(
                 .getInstantMap()
                 .getAverageItemsByHour()
                 .toPersistentList()
-        val averageItemsByDay = averageItemsByHour.getAverageItemsByDay()
+        val averageItemsByDay =
+            averageItemsByHour
+                .getAverageItemsByDay()
+                .addDailyForecastItem()
+
         _state.update { uiState ->
             uiState.copy(
                 isLoading = false,
-                averageForecastItemsByHour = averageItemsByHour,
                 averageForecastItemsByDay = averageItemsByDay,
             )
         }
     }
 
-    private fun PersistentList<CommonForecastItem>.getAverageItemsByDay(): PersistentList<Pair<LocalDate, PersistentList<CommonForecastItem>>> =
+    private fun PersistentList<
+        Pair<LocalDate, PersistentList<CommonForecastItem>>,
+    >.addDailyForecastItem(): PersistentList<
+        Triple<LocalDate, PersistentList<CommonForecastItem>, CommonDailyForecastItem>,
+    > =
+        map { (date, items) ->
+            Triple(date, items, items.getDailyForecastItem())
+        }.toPersistentList()
+
+    private fun PersistentList<CommonForecastItem>.getDailyForecastItem(): CommonDailyForecastItem {
+        var dailyForecastItem = CommonDailyForecastItem()
+        forEach { item ->
+            dailyForecastItem =
+                dailyForecastItem.copy(
+                    averageWindDirection =
+                        dailyForecastItem.averageWindDirection.safePlus(item.windDirection),
+                    averageWindGust =
+                        dailyForecastItem.averageWindGust.safePlus(item.windGust),
+                    averageWindSpeed =
+                        dailyForecastItem.averageWindSpeed.safePlus(item.windSpeed),
+                    highAirTemperature =
+                        dailyForecastItem.highAirTemperature.takeMax(item.airTemperature),
+                    highCloudCover =
+                        dailyForecastItem.highCloudCover.takeMax(item.cloudCover),
+                    highFeelsLikeTemperature =
+                        dailyForecastItem.highFeelsLikeTemperature.takeMax(
+                            item.feelsLikeTemperature,
+                        ),
+                    highRelativeHumidity =
+                        dailyForecastItem.highRelativeHumidity.takeMax(item.relativeHumidity),
+                    highSeaLevelPressure =
+                        dailyForecastItem.highSeaLevelPressure.takeMax(item.seaLevelPressure),
+                    highTotalPrecipitation =
+                        dailyForecastItem.highTotalPrecipitation.takeMax(item.totalPrecipitation),
+                    lowAirTemperature =
+                        dailyForecastItem.lowAirTemperature.takeMin(item.airTemperature),
+                    lowCloudCover =
+                        dailyForecastItem.lowCloudCover.takeMin(item.cloudCover),
+                    lowFeelsLikeTemperature =
+                        dailyForecastItem.lowFeelsLikeTemperature.takeMin(
+                            item.feelsLikeTemperature,
+                        ),
+                    lowRelativeHumidity =
+                        dailyForecastItem.lowRelativeHumidity.takeMin(item.relativeHumidity),
+                    lowSeaLevelPressure =
+                        dailyForecastItem.lowSeaLevelPressure.takeMin(item.seaLevelPressure),
+                    lowTotalPrecipitation =
+                        dailyForecastItem.lowTotalPrecipitation.takeMin(item.totalPrecipitation),
+                )
+        }
+        return dailyForecastItem.copy(
+            averageWindDirection = dailyForecastItem.averageWindDirection?.div(size),
+            averageWindGust = dailyForecastItem.averageWindGust?.div(size),
+            averageWindSpeed = dailyForecastItem.averageWindSpeed?.div(size),
+        )
+    }
+
+    private fun PersistentList<CommonForecastItem>.getAverageItemsByDay(): PersistentList<
+        Pair<
+            LocalDate,
+            PersistentList<CommonForecastItem>,
+        >,
+    > =
         groupBy { item ->
             item.instant?.toLocalDateTime(
                 TimeZone.currentSystemDefault(),
@@ -83,7 +149,10 @@ class InfoViewModel(
             key to value.toPersistentList()
         }.toList().toPersistentList()
 
-    private fun PersistentMap<Instant, PersistentList<CommonForecastItem>>.getAverageItemsByHour(): PersistentList<CommonForecastItem> =
+    private fun PersistentMap<
+        Instant,
+        PersistentList<CommonForecastItem>,
+    >.getAverageItemsByHour(): PersistentList<CommonForecastItem> =
         buildList {
             this@getAverageItemsByHour.forEach { mapEntry ->
                 val averageItem = mapEntry.toPair().averageItem()
@@ -91,7 +160,10 @@ class InfoViewModel(
             }
         }.toPersistentList()
 
-    private fun Pair<Instant, PersistentList<CommonForecastItem>>.averageItem(): CommonForecastItem {
+    private fun Pair<
+        Instant,
+        PersistentList<CommonForecastItem>,
+    >.averageItem(): CommonForecastItem {
         var averageItem = CommonForecastItem.WithZeroes.copy(instant = first)
         second.forEach { item ->
             averageItem =
@@ -138,7 +210,8 @@ class InfoViewModel(
         )
     }
 
-    private fun PersistentList<CommonForecast>.getInstantMap(): PersistentMap<Instant, PersistentList<CommonForecastItem>> =
+    private fun PersistentList<CommonForecast>.getInstantMap():
+        PersistentMap<Instant, PersistentList<CommonForecastItem>> =
         buildMap<Instant, PersistentList<CommonForecastItem>> {
             this@getInstantMap.forEach { forecast ->
                 forecast.items
@@ -153,4 +226,26 @@ class InfoViewModel(
         }.toPersistentMap()
 
     private fun Double?.safePlus(second: Double?): Double = this?.plus(second ?: 0.0) ?: 0.0
+
+    private fun Double?.takeMax(second: Double?): Double? =
+        if (this == null) {
+            second
+        } else if (second == null) {
+            null
+        } else if (this > second) {
+            this
+        } else {
+            second
+        }
+
+    private fun Double?.takeMin(second: Double?): Double? =
+        if (this == null) {
+            second
+        } else if (second == null) {
+            null
+        } else if (this < second) {
+            this
+        } else {
+            second
+        }
 }
