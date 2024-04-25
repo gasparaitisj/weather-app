@@ -3,8 +3,6 @@ package com.justas.weather.core.data.response
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import com.justas.weather.core.domain.model.CommonForecast
 import com.justas.weather.core.domain.model.CommonForecastItem
-import com.justas.weather.core.domain.model.CommonWindDirection
-import kotlin.math.roundToInt
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
@@ -46,10 +44,7 @@ data class DMIForecastResponse(
                             ?.times(100)
                             ?.doubleValue(exactRequired = false)
                     val seaLevelPressureInHpa = seaLevelPressureValues[index]?.times(0.01)
-                    val windDirection =
-                        CommonWindDirection.getDirection(
-                            windDirectionValues[index]?.roundToInt(),
-                        )
+                    val windDirection = windDirectionValues[index]
                     add(
                         CommonForecastItem(
                             airTemperature = airTemperatureInCelsius,

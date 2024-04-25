@@ -20,7 +20,7 @@ class FMIApi(
 
     override suspend fun getForecast(place: CommonPlace): CommonForecast =
         httpClient.get {
-            url("http://opendata.fmi.fi/wfs")
+            url("https://opendata.fmi.fi/wfs")
             parameter("service", "WFS")
             parameter("version", "2.0.0")
             parameter("request", "getFeature")

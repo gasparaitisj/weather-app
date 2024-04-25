@@ -1,4 +1,4 @@
-package com.justas.weather.app.theme
+package com.justas.weather.app.main.theme
 
 import androidx.compose.ui.graphics.Color
 

@@ -2,8 +2,6 @@ package com.justas.weather.core.data.response
 
 import com.justas.weather.core.domain.model.CommonForecast
 import com.justas.weather.core.domain.model.CommonForecastItem
-import com.justas.weather.core.domain.model.CommonWindDirection
-import kotlin.math.roundToInt
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
@@ -46,9 +44,7 @@ data class SMHIForecastResponse(
                             SMHIParameterType.MEAN_PRECIPITATION_INTENSITY,
                         )?.div(hoursPassedSinceLastValidTime),
                     windDirection =
-                        CommonWindDirection.getDirection(
-                            params.findValue(SMHIParameterType.WIND_DIRECTION)?.roundToInt(),
-                        ),
+                        params.findValue(SMHIParameterType.WIND_DIRECTION),
                     windGust = params.findValue(SMHIParameterType.WIND_GUST_SPEED),
                     windSpeed = params.findValue(SMHIParameterType.WIND_SPEED),
                 )
