@@ -7,17 +7,12 @@ import com.justas.weather.core.domain.model.CommonForecastItem
 import com.justas.weather.core.domain.repository.ForecastRepository
 import com.justas.weather.core.domain.repository.ForecastState
 import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
-
-data class InfoState(
-    val averageForecastItems: PersistentList<CommonForecastItem> = persistentListOf()
-)
 
 class InfoViewModel(
     private val forecastRepository: ForecastRepository
@@ -30,48 +25,73 @@ class InfoViewModel(
 
     fun onRefresh() {
         viewModelScope.launch {
-            val itemMap = forecastState.forecasts.getInstantMap()
-            val averageItems: List<CommonForecastItem> =
-                itemMap.map { (key, value) ->
-                    var averageItem = CommonForecastItem(instant = key)
-                    value.map { item ->
-                        averageItem =
-                            averageItem.copy(
-                                airTemperature =
-                                    averageItem.airTemperature?.safePlus(item.airTemperature),
-                                cloudCover = averageItem.cloudCover?.safePlus(item.cloudCover),
-                                feelsLikeTemperature =
-                                    averageItem.feelsLikeTemperature?.safePlus(
-                                        item.feelsLikeTemperature,
-                                    ),
-                                relativeHumidity =
-                                    averageItem.relativeHumidity?.safePlus(
-                                        item.relativeHumidity,
-                                    ),
-                                seaLevelPressure =
-                                    averageItem.seaLevelPressure?.safePlus(
-                                        item.seaLevelPressure,
-                                    ),
-                                totalPrecipitation =
-                                    averageItem.totalPrecipitation?.safePlus(
-                                        item.totalPrecipitation,
-                                    ),
-                                windDirection =
-                                    averageItem.windDirection?.safePlus(
-                                        item.windDirection,
-                                    ),
-                                windGust = averageItem.windGust?.safePlus(item.windGust),
-                                windSpeed = averageItem.windSpeed?.safePlus(item.windSpeed),
-                            )
-                    }
-                    averageItem
-                }
+            val averageItems =
+                forecastState
+                    .forecasts
+                    .getInstantMap()
+                    .getAverageItems()
+                    .toPersistentList()
             _state.update { uiState ->
                 uiState.copy(
-                    averageForecastItems = averageItems.toPersistentList(),
+                    averageForecastItems = averageItems,
                 )
             }
         }
+    }
+
+    private fun Map<Instant, List<CommonForecastItem>>.getAverageItems(): List<CommonForecastItem> =
+        buildList {
+            this@getAverageItems.map { mapEntry ->
+                val averageItem = mapEntry.toPair().averageItem()
+                add(averageItem)
+            }
+        }
+
+    private fun Pair<Instant, List<CommonForecastItem>>.averageItem(): CommonForecastItem {
+        var averageItem = CommonForecastItem.WithZeroes.copy(instant = first)
+        second.forEach { item ->
+            averageItem =
+                averageItem.copy(
+                    airTemperature =
+                        averageItem.airTemperature?.safePlus(item.airTemperature),
+                    cloudCover =
+                        averageItem.cloudCover?.safePlus(item.cloudCover),
+                    feelsLikeTemperature =
+                        averageItem.feelsLikeTemperature?.safePlus(item.feelsLikeTemperature),
+                    relativeHumidity =
+                        averageItem.relativeHumidity?.safePlus(item.relativeHumidity),
+                    seaLevelPressure =
+                        averageItem.seaLevelPressure?.safePlus(item.seaLevelPressure),
+                    totalPrecipitation =
+                        averageItem.totalPrecipitation?.safePlus(item.totalPrecipitation),
+                    windDirection =
+                        averageItem.windDirection?.safePlus(item.windDirection),
+                    windGust =
+                        averageItem.windGust?.safePlus(item.windGust),
+                    windSpeed =
+                        averageItem.windSpeed?.safePlus(item.windSpeed),
+                )
+        }
+        return averageItem.copy(
+            airTemperature =
+                averageItem.airTemperature?.div(second.size),
+            cloudCover =
+                averageItem.cloudCover?.div(second.size),
+            feelsLikeTemperature =
+                averageItem.feelsLikeTemperature?.div(second.size),
+            relativeHumidity =
+                averageItem.relativeHumidity?.div(second.size),
+            seaLevelPressure =
+                averageItem.seaLevelPressure?.div(second.size),
+            totalPrecipitation =
+                averageItem.totalPrecipitation?.div(second.size),
+            windDirection =
+                averageItem.windDirection?.div(second.size),
+            windGust =
+                averageItem.windGust?.div(second.size),
+            windSpeed =
+                averageItem.windSpeed?.div(second.size),
+        )
     }
 
     private fun PersistentList<CommonForecast>.getInstantMap(): Map<Instant, List<CommonForecastItem>> =
@@ -87,5 +107,5 @@ class InfoViewModel(
             }
         }
 
-    private fun Double?.safePlus(other: Double?): Double? = this?.plus(other ?: 0.0)
+    private fun Double?.safePlus(second: Double?): Double = this?.plus(second ?: 0.0) ?: 0.0
 }

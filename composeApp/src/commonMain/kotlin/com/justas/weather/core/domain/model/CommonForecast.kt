@@ -25,4 +25,19 @@ data class CommonForecastItem(
     val windDirection: Double? = null,
     val windGust: Double? = null,
     val windSpeed: Double? = null,
-)
+) {
+    companion object {
+        val WithZeroes =
+            CommonForecastItem(
+                airTemperature = 0.0,
+                cloudCover = 0.0,
+                feelsLikeTemperature = 0.0,
+                relativeHumidity = 0.0,
+                seaLevelPressure = 0.0,
+                totalPrecipitation = 0.0,
+                windDirection = 0.0,
+                windGust = 0.0,
+                windSpeed = 0.0,
+            )
+    }
+}
