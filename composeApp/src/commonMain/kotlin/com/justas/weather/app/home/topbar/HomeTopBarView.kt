@@ -1,4 +1,4 @@
-package com.justas.weather.app.main.topbar
+package com.justas.weather.app.home.topbar
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,24 +10,20 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.justas.weather.app.home.TextFieldMenu
-import com.justas.weather.app.main.theme.AppTypography
 import com.justas.weather.core.domain.model.CommonPlace
 
+@Composable
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalFoundationApi::class,
 )
-@Composable
-fun MainTopBar(
-    state: TopBarState,
+fun HomeTopBarView(
+    state: HomeTopBarState,
     modifier: Modifier = Modifier,
     onItemSelected: (CommonPlace?) -> Unit = {},
     onRefresh: () -> Unit = {},
@@ -49,6 +45,7 @@ fun MainTopBar(
                     Modifier
                         .fillMaxWidth(0.5f),
                 label = "City",
+                isLoading = state.isLoading,
                 options = state.places,
                 selectedOption = state.selectedPlace,
                 onOptionSelected = onItemSelected,
@@ -62,12 +59,12 @@ fun MainTopBar(
                 },
             )
         },
-        actions = { MainRefreshIconButton(onRefresh = onRefresh) },
+        actions = { HomeTopBarRefreshButton(onRefresh = onRefresh) },
     )
 }
 
 @Composable
-private fun MainRefreshIconButton(onRefresh: () -> Unit) {
+private fun HomeTopBarRefreshButton(onRefresh: () -> Unit = {}) {
     IconButton(
         modifier =
             Modifier
@@ -82,17 +79,4 @@ private fun MainRefreshIconButton(onRefresh: () -> Unit) {
             contentDescription = "Refresh",
         )
     }
-}
-
-@Composable
-private fun MainText(text: String?,) {
-    if (text == null) return
-    Text(
-        modifier =
-            Modifier
-                .padding(start = 16.dp),
-        text = text,
-        style = AppTypography.titleLarge,
-        overflow = TextOverflow.Ellipsis,
-    )
 }

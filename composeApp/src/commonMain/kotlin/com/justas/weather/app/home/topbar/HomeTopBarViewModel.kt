@@ -1,4 +1,4 @@
-package com.justas.weather.app.main.topbar
+package com.justas.weather.app.home.topbar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,11 +11,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class TopBarViewModel(
+class HomeTopBarViewModel(
     private val placesApi: LTMPlacesApi,
     private val forecastRepository: ForecastRepository,
 ) : ViewModel() {
-    private val _state = MutableStateFlow(TopBarState())
+    private val _state = MutableStateFlow(HomeTopBarState())
     val state = _state.asStateFlow()
 
     init {
@@ -23,11 +23,21 @@ class TopBarViewModel(
     }
 
     private fun onCreated() {
+        getPlaces()
+    }
+
+    fun getPlaces() {
         viewModelScope.launch {
             _state.update { uiState ->
-                val places = placesApi.getPlaces().toPersistentList()
+                uiState.copy(
+                    isLoading = true,
+                )
+            }
+            val places = placesApi.getPlaces().toPersistentList()
+            _state.update { uiState ->
                 uiState.copy(
                     places = places,
+                    isLoading = false,
                 )
             }
         }

@@ -5,9 +5,12 @@ import com.justas.weather.core.di.ServiceLocator.log
 import com.justas.weather.core.domain.model.CommonForecast
 import com.justas.weather.core.domain.model.CommonForecastItem
 import com.justas.weather.core.domain.model.CommonPlace
+import com.justas.weather.core.util.instant.isAfter
+import kotlin.time.Duration.Companion.hours
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.CompletionHandler
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +19,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 
 class ForecastRepository(
     private val forecastApis: ImmutableList<ForecastApi>,
@@ -49,7 +51,9 @@ class ForecastRepository(
             uiState.copy(
                 forecasts =
                     buildList {
-                        val sortedApi = forecastApis.sortedBy { it.name }
+                        val sortedApi =
+                            forecastApis
+                                .sortedBy { it.name }
                         repeat(sortedApi.size) { index ->
                             add(
                                 CommonForecast(
@@ -71,10 +75,30 @@ class ForecastRepository(
                         api = forecastApis[index],
                         place = place,
                     )
-                }
+                }.invokeOnCompletion(getCompletionHandler(forecastApis[index].name))
             }
         }
     }
+
+    private fun getCompletionHandler(provider: String): CompletionHandler =
+        { cause: Throwable? ->
+            if (cause == null) {
+                log.i { "$provider loaded successfully!" }
+            } else {
+                log.e { "Error while loading $provider forecast. ${cause.stackTraceToString()}" }
+                _state.update { uiState ->
+                    val forecast =
+                        CommonForecast(
+                            isLoading = false,
+                            provider = provider,
+                            errorMessage = cause.stackTraceToString(),
+                        )
+                    uiState.copy(
+                        forecasts = uiState.forecasts.updateForecast(forecast),
+                    )
+                }
+            }
+        }
 
     private suspend fun loadForecast(
         api: ForecastApi,
@@ -110,7 +134,6 @@ class ForecastRepository(
 
     private fun PersistentList<CommonForecastItem>.filterUpToDate() =
         filter { item ->
-            item.instant != null &&
-                Clock.System.now() <= item.instant
+            item.instant != null && item.instant.isAfter((-1).hours)
         }.toPersistentList()
 }

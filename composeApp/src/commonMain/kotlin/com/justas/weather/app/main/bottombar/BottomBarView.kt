@@ -14,7 +14,7 @@ import com.justas.weather.app.main.theme.AppTypography
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
-fun MainBottomBar(
+fun BottomBarView(
     items: ImmutableList<BottomBarItem>,
     selectedItem: BottomBarItem,
     modifier: Modifier = Modifier,

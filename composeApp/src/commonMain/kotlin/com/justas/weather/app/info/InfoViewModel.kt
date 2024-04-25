@@ -7,12 +7,20 @@ import com.justas.weather.core.domain.model.CommonForecastItem
 import com.justas.weather.core.domain.repository.ForecastRepository
 import com.justas.weather.core.domain.repository.ForecastState
 import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.PersistentMap
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.plus
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 class InfoViewModel(
     private val forecastRepository: ForecastRepository
@@ -23,31 +31,67 @@ class InfoViewModel(
     private val forecastState: ForecastState
         get() = forecastRepository.state.value
 
-    fun onRefresh() {
+    init {
+        onCreated()
+    }
+
+    private fun onCreated() {
+        collectAndUpdateIfAllForecastsAreLoaded()
+    }
+
+    private fun collectAndUpdateIfAllForecastsAreLoaded() {
         viewModelScope.launch {
-            val averageItems =
-                forecastState
-                    .forecasts
-                    .getInstantMap()
-                    .getAverageItems()
-                    .toPersistentList()
-            _state.update { uiState ->
-                uiState.copy(
-                    averageForecastItems = averageItems,
-                )
+            forecastRepository.state.collectLatest { state ->
+                val isAnyForecastLoading = state.forecasts.any { it.isLoading }
+                _state.update { uiState ->
+                    uiState.copy(
+                        isLoading = isAnyForecastLoading,
+                    )
+                }
+                if (!isAnyForecastLoading) {
+                    onRefresh()
+                }
             }
         }
     }
 
-    private fun Map<Instant, List<CommonForecastItem>>.getAverageItems(): List<CommonForecastItem> =
+    private fun onRefresh() {
+        val averageItemsByHour =
+            forecastState
+                .forecasts
+                .getInstantMap()
+                .getAverageItemsByHour()
+                .toPersistentList()
+        val averageItemsByDay = averageItemsByHour.getAverageItemsByDay()
+        _state.update { uiState ->
+            uiState.copy(
+                isLoading = false,
+                averageForecastItemsByHour = averageItemsByHour,
+                averageForecastItemsByDay = averageItemsByDay,
+            )
+        }
+    }
+
+    private fun PersistentList<CommonForecastItem>.getAverageItemsByDay(): PersistentList<Pair<LocalDate, PersistentList<CommonForecastItem>>> =
+        groupBy { item ->
+            item.instant?.toLocalDateTime(
+                TimeZone.currentSystemDefault(),
+            )?.date ?: LocalDate.fromEpochDays(0)
+        }.filter { (key, _) ->
+            key != LocalDate.fromEpochDays(0)
+        }.map { (key, value) ->
+            key to value.toPersistentList()
+        }.toList().toPersistentList()
+
+    private fun PersistentMap<Instant, PersistentList<CommonForecastItem>>.getAverageItemsByHour(): PersistentList<CommonForecastItem> =
         buildList {
-            this@getAverageItems.map { mapEntry ->
+            this@getAverageItemsByHour.forEach { mapEntry ->
                 val averageItem = mapEntry.toPair().averageItem()
                 add(averageItem)
             }
-        }
+        }.toPersistentList()
 
-    private fun Pair<Instant, List<CommonForecastItem>>.averageItem(): CommonForecastItem {
+    private fun Pair<Instant, PersistentList<CommonForecastItem>>.averageItem(): CommonForecastItem {
         var averageItem = CommonForecastItem.WithZeroes.copy(instant = first)
         second.forEach { item ->
             averageItem =
@@ -94,18 +138,19 @@ class InfoViewModel(
         )
     }
 
-    private fun PersistentList<CommonForecast>.getInstantMap(): Map<Instant, List<CommonForecastItem>> =
-        buildMap {
+    private fun PersistentList<CommonForecast>.getInstantMap(): PersistentMap<Instant, PersistentList<CommonForecastItem>> =
+        buildMap<Instant, PersistentList<CommonForecastItem>> {
             this@getInstantMap.forEach { forecast ->
                 forecast.items
                     .groupBy { item -> item.instant }
                     .forEach { (key, value) ->
                         if (key != null) {
-                            this[key] = this[key]?.plus(value) ?: value
+                            val list = this[key] ?: persistentListOf()
+                            this[key] = list.plus(value)
                         }
                     }
             }
-        }
+        }.toPersistentMap()
 
     private fun Double?.safePlus(second: Double?): Double = this?.plus(second ?: 0.0) ?: 0.0
 }

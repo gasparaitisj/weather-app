@@ -1,6 +1,8 @@
-package com.justas.weather.app.home
+package com.justas.weather.app.home.topbar
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
@@ -8,6 +10,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -75,15 +78,24 @@ fun <T> TextFieldMenu(
             },
         )
     },
+    isLoading: Boolean = true,
     focusRequester: FocusRequester = remember { FocusRequester() },
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     trailingIcon: @Composable (expanded: Boolean) -> Unit = { expanded ->
-        Icon(
-            imageVector = Icons.Filled.ArrowDropDown,
-            contentDescription = null,
-            modifier = Modifier.rotate(if (expanded) 180f else 0f),
-            tint = Color.Black,
-        )
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(16.dp),
+                color = Color.Black,
+                strokeWidth = 2.5.dp,
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Filled.ArrowDropDown,
+                contentDescription = null,
+                modifier = Modifier.rotate(if (expanded) 180f else 0f),
+                tint = Color.Black,
+            )
+        }
     },
     textFieldColors: TextFieldColors =
         ExposedDropdownMenuDefaults.textFieldColors(
@@ -99,6 +111,10 @@ fun <T> TextFieldMenu(
             unfocusedIndicatorColor = Color.Transparent,
             cursorColor = Color.Black,
             errorCursorColor = Color.Black,
+            disabledPlaceholderColor = Color.Black.copy(alpha = 0.3f),
+            errorPlaceholderColor = Color.Black.copy(alpha = 0.3f),
+            focusedPlaceholderColor = Color.Black.copy(alpha = 0.3f),
+            unfocusedPlaceholderColor = Color.Black.copy(alpha = 0.3f),
         ),
     bringIntoViewRequester: BringIntoViewRequester = remember { BringIntoViewRequester() },
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
@@ -130,7 +146,7 @@ fun <T> TextFieldMenu(
     val focusManager = LocalFocusManager.current
 
     ExposedDropdownMenuBox(
-        expanded = dropDownExpanded,
+        expanded = dropDownExpanded && !isLoading,
         onExpandedChange = { dropDownExpanded = !dropDownExpanded },
         modifier = modifier,
     ) {
@@ -142,8 +158,7 @@ fun <T> TextFieldMenu(
             },
             modifier =
                 Modifier
-                    // Match the parent width
-                    .width(256.dp)
+                    .fillMaxWidth()
                     .bringIntoViewRequester(bringIntoViewRequester)
                     .menuAnchor()
                     .focusRequester(focusRequester)
@@ -174,10 +189,12 @@ fun <T> TextFieldMenu(
                     },
             label = {
                 Text(
-                    text = label,
+                    text = if (isLoading) "Loading..." else label,
                     style = AppTypography.labelMedium.copy(color = Color.Black),
                 )
             },
+            readOnly = isLoading,
+            placeholder = { Text(text = "Please enter a city...") },
             trailingIcon = { trailingIcon(dropDownExpanded) },
             colors = textFieldColors,
             singleLine = true,
@@ -209,10 +226,9 @@ fun <T> TextFieldMenu(
             val dropdownOptions =
                 remember(textInput) {
                     if (textInput.text.isEmpty()) {
-                        // Show the first 10 options
-                        options.take(10)
+                        options.take(5)
                     } else {
-                        filteredOptions(textInput.text)
+                        filteredOptions(textInput.text).take(5)
                     }
                 }
 

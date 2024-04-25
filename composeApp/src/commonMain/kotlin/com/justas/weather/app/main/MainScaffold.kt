@@ -9,25 +9,26 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.justas.weather.app.home.HomeScreen
+import com.justas.weather.app.home.topbar.HomeTopBarView
+import com.justas.weather.app.home.topbar.HomeTopBarViewModel
 import com.justas.weather.app.info.InfoScreen
 import com.justas.weather.app.info.InfoViewModel
+import com.justas.weather.app.info.topbar.InfoTopBarView
 import com.justas.weather.app.main.bottombar.BottomBarItem
+import com.justas.weather.app.main.bottombar.BottomBarView
 import com.justas.weather.app.main.bottombar.BottomBarViewModel
-import com.justas.weather.app.main.bottombar.MainBottomBar
-import com.justas.weather.app.main.topbar.MainTopBar
-import com.justas.weather.app.main.topbar.TopBarViewModel
 import com.justas.weather.core.domain.repository.ForecastRepository
 
 @Composable
 fun MainScaffold(
     forecastRepository: ForecastRepository,
-    topBarViewModel: TopBarViewModel,
+    homeTopBarViewModel: HomeTopBarViewModel,
     bottomBarViewModel: BottomBarViewModel,
     infoViewModel: InfoViewModel,
     modifier: Modifier = Modifier,
 ) {
     val forecastState by forecastRepository.state.collectAsState()
-    val topBarState by topBarViewModel.state.collectAsState()
+    val homeTopBarState by homeTopBarViewModel.state.collectAsState()
     val bottomBarState by bottomBarViewModel.state.collectAsState()
     val infoState by infoViewModel.state.collectAsState()
     Scaffold(
@@ -37,18 +38,26 @@ fun MainScaffold(
                 .then(modifier),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            if (bottomBarState.selectedItem == BottomBarItem.HOME) {
-                MainTopBar(
-                    state = topBarState,
-                    onItemSelected = topBarViewModel::onPlaceSelected,
-                    onRefresh = {
-                        forecastRepository.onRefresh(topBarState.selectedPlace)
-                    },
-                )
+            when (bottomBarState.selectedItem) {
+                BottomBarItem.HOME -> {
+                    HomeTopBarView(
+                        state = homeTopBarState,
+                        onItemSelected = homeTopBarViewModel::onPlaceSelected,
+                        onRefresh = {
+                            homeTopBarViewModel.getPlaces()
+                            forecastRepository.onRefresh(homeTopBarState.selectedPlace)
+                        },
+                    )
+                }
+                BottomBarItem.INFO -> {
+                    InfoTopBarView(
+                        place = homeTopBarState.selectedPlace,
+                    )
+                }
             }
         },
         bottomBar = {
-            MainBottomBar(
+            BottomBarView(
                 items = bottomBarState.items,
                 selectedItem = bottomBarState.selectedItem,
                 onItemClick = bottomBarViewModel::onItemSelected,
@@ -69,8 +78,7 @@ fun MainScaffold(
                     modifier =
                         Modifier
                             .padding(paddingValues),
-                    state = infoState,
-                    onRefresh = infoViewModel::onRefresh,
+                    infoState = infoState,
                 )
             }
         }
