@@ -43,7 +43,7 @@ fun HomeTopBarView(
             TextFieldMenu(
                 modifier =
                     Modifier
-                        .fillMaxWidth(0.5f),
+                        .fillMaxWidth(),
                 label = "City",
                 isLoading = state.isLoading,
                 options = state.places,

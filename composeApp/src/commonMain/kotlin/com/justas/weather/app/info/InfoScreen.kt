@@ -113,6 +113,7 @@ private fun InfoLazyColumn(
                 DailyForecastItem(
                     modifier =
                         Modifier
+                            .padding(top = 12.dp)
                             .align(Alignment.Start),
                     item = dailyItem,
                 )
