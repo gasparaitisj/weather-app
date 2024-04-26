@@ -1,4 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -8,24 +10,24 @@ plugins {
 }
 
 kotlin {
-//    @OptIn(ExperimentalWasmDsl::class)
-//    wasmJs {
-//        moduleName = "composeApp"
-//        browser {
-//            commonWebpackConfig {
-//                outputFileName = "composeApp.js"
-//                devServer =
-//                    (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-//                        static =
-//                            (static ?: mutableListOf()).apply {
-//                                // Serve sources to debug inside browser
-//                                add(project.projectDir.path)
-//                            }
-//                    }
-//            }
-//        }
-//        binaries.executable()
-//    }
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        moduleName = "composeApp"
+        browser {
+            commonWebpackConfig {
+                outputFileName = "composeApp.js"
+                devServer =
+                    (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+                        static =
+                            (static ?: mutableListOf()).apply {
+                                // Serve sources to debug inside browser
+                                add(project.projectDir.path)
+                            }
+                    }
+            }
+        }
+        binaries.executable()
+    }
 
     androidTarget {
         compilations.all {
@@ -56,11 +58,17 @@ kotlin {
 
     sourceSets {
         val desktopMain by getting
+        val wasmJsMain by getting
 
+        wasmJsMain.dependencies {
+            implementation(libs.ktor.client.core)
+            implementation(libs.androidx.lifecycle.viewmodel.wasm.js)
+        }
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.androidx.lifecycle.viewmodel)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -69,7 +77,6 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-            implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.logging)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.client.content.negotiation)
@@ -82,15 +89,16 @@ kotlin {
             implementation(libs.xmlutil.core)
             implementation(libs.xmlutil.serialization)
             implementation(libs.bignum)
-            implementation(libs.androidx.lifecycle.viewmodel)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            implementation(libs.androidx.lifecycle.viewmodel)
         }
         desktopMain.dependencies {
             implementation(libs.kotlinx.coroutines.swing)
             implementation(compose.desktop.currentOs)
             implementation(libs.ktor.client.java)
+            implementation(libs.androidx.lifecycle.viewmodel)
         }
     }
 }
