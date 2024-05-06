@@ -13,7 +13,6 @@ data class CommonPlace(
             CommonPlace(
                 administrativeDivision = "Vilniaus miesto savivaldybė",
                 code = "vilnius",
-                countryName = "Lietuva",
                 countryCode = "LT",
                 name = "Vilnius",
                 coordinates =

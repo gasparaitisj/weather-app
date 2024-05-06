@@ -1,0 +1,130 @@
+```plantuml
+@startuml
+!theme mars
+skinparam noteTextAlignment center
+annotation Serializable
+
+class "LTMForecastResponse" implements Serializable {
+    forecastCreationTimeUtc: String?
+	forecastTimestamps: List<LTMForecastTimestamp?>?
+	forecastType: String?
+	place: LTMPlace?
+__
+    toModel(): CommonForecast
+}
+class "DMIForecastResponse" implements Serializable {
+    domain: DMIDomain?
+	ranges: DMIRanges?
+	toModel(): CommonForecast
+__
+    toModel(): CommonForecast
+}
+class "SMHIForecastResponse" implements Serializable {
+    approvedTime: String?
+	geometry: SMHIGeometry?
+	referenceTime: String?
+	timeSeries: List<SMHITimeSeries?>?
+__
+    toModel(): CommonForecast
+}
+class "NOMForecastResponse" implements Serializable {
+    geometry: NOMGeometry?
+	properties: NOMProperties?
+	type: String?
+__
+    toModel(): CommonForecast
+}
+class "OWMForecastResponse" implements Serializable {
+    city: City?
+	cnt: Double?
+	cod: String?
+	list: List<OWMItem?>?
+	message: Double?
+__
+    toModel(): CommonForecast
+}
+class "FMIForecastResponse" implements Serializable {
+    member: FMIMember
+__
+    toModel(): CommonForecast
+}
+interface "ForecastApi" {
+    name: String
+    getForecast(place: CommonPlace): CommonForecast
+}
+class "LTMForecastApi" implements "ForecastApi" {
+    httpClient: HttpClient
+}
+class "OWMApi" implements "ForecastApi" {
+    httpClient: HttpClient
+}
+class "FMIApi" implements "ForecastApi" {
+    httpClient: HttpClient
+	xmlUtil: XML
+}
+class "SMHIApi" implements "ForecastApi" {
+    httpClient: HttpClient
+}
+class "NOMApi" implements "ForecastApi" {
+    httpClient: HttpClient
+}
+class "DMIApi" implements "ForecastApi" {
+    httpClient: HttpClient
+}
+class "ForecastRepository" {
+    state: ForecastState
+    forecastApis: ImmutableList<ForecastApi>
+	onRefresh(place: CommonPlace)
+}
+class "ForecastState" {
+    forecasts: PersistentList<CommonForecast>
+}
+class "CommonPlace" {
+    administrativeDivision: String
+	code: String
+	countryName: String
+	countryCode: String
+	name: String
+	coordinates: CommonCoordinates
+}
+class CommonForecast {
+    items: PersistentList<CommonForecastItem>
+	provider: String
+	creationDateTime: Instant? 
+	isLoading: Boolean
+	errorMessage: String
+}
+class "CommonForecastItem" {
+    airTemperature: Double? 
+	cloudCover: Double? 
+	condition: String
+	feelsLikeTemperature: Double? 
+	instant: Instant? 
+	relativeHumidity: Double? 
+	seaLevelPressure: Double? 
+	totalPrecipitation: Double? 
+	windDirection: Double? 
+	windGust: Double? 
+	windSpeed: Double? 
+}
+class "CommonCoordinates" {
+    latitude: Double? 
+	longitude: Double? 
+}
+
+"CommonPlace" <|--- "CommonCoordinates"
+"ForecastState" <|--- CommonForecast
+CommonForecast <|--- "CommonForecastItem"
+
+"LTMForecastApi" <|--- "LTMForecastResponse"
+"OWMApi" <|--- "OWMForecastResponse"
+"FMIApi" <|--- "FMIForecastResponse"
+"SMHIApi" <|--- "SMHIForecastResponse"
+"NOMApi" <|--- "NOMForecastResponse"
+"DMIApi" <|--- "DMIForecastResponse"
+
+"ForecastRepository" <|--- "ForecastApi"
+"ForecastRepository" <|--- "CommonPlace"
+"ForecastRepository" <|--- "ForecastState"
+@enduml
+```

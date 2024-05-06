@@ -1,0 +1,45 @@
+```plantuml
+@startuml
+!theme mars
+skinparam noteTextAlignment center
+' Composable views
+
+class App << Composable >> {
+
+}
+note bottom of App : Every platform window implements\nthis common UI Composable.
+
+class MainActivity << Activity >> {
++ onCreate(savedInstanceState: Bundle?)
+}
+note top of "MainActivity" : Android application\nlaunch component.
+
+class DesktopApp << Application >> {
+
+}
+note top of "DesktopApp" : Windows / macOS / Linux\ndesktop application launch component.
+
+class MainViewController << ViewController >> {
++ viewDidLoad()
+}
+note top of "MainViewController" : iOS application\nlaunch component.
+
+class CanvasBasedWindow << HTML Canvas >>
+note top of CanvasBasedWindow : WASM-based web\napplication launch component.
+
+'class MainScaffold << Composable >> {
+'forecastRepository: ForecastRepository
+'homeTopBarViewModel: HomeTopBarViewModel
+'bottomBarViewModel: BottomBarViewModel
+'infoViewModel: InfoViewModel
+'}
+'note bottom of MainScaffold : A scaffold is a fundamental structure\n that provides\n a standardized platform\n for complex user interfaces.\nIt holds together the UI parts,\n such as the screen, the top bar\n and the bottom bar.
+
+' Main logic
+"MainActivity" <|--- "App"
+"DesktopApp" <|--- "App"
+"MainViewController" <|--- "App"
+"CanvasBasedWindow" <|--- "App"
+'"App" <|--- "MainScaffold"
+@enduml
+```

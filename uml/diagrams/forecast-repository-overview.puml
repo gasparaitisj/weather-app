@@ -1,0 +1,87 @@
+```plantuml
+@startuml
+!theme mars
+skinparam noteTextAlignment center
+class "LTMForecastResponse"  {
+    forecastCreationTimeUtc: String?
+	forecastTimestamps: List<LTMForecastTimestamp?>?
+	forecastType: String?
+	place: LTMPlace?
+__
+    toModel(): CommonForecast
+}
+class "DMIForecastResponse"  {
+    domain: DMIDomain?
+	ranges: DMIRanges?
+	toModel(): CommonForecast
+__
+    toModel(): CommonForecast
+}
+class "SMHIForecastResponse"  {
+    approvedTime: String?
+	geometry: SMHIGeometry?
+	referenceTime: String?
+	timeSeries: List<SMHITimeSeries?>?
+__
+    toModel(): CommonForecast
+}
+class "NOMForecastResponse"  {
+    geometry: NOMGeometry?
+	properties: NOMProperties?
+	type: String?
+__
+    toModel(): CommonForecast
+}
+class "OWMForecastResponse"  {
+    city: City?
+	cnt: Double?
+	cod: String?
+	list: List<OWMItem?>?
+	message: Double?
+__
+    toModel(): CommonForecast
+}
+class "FMIForecastResponse"  {
+    member: FMIMember
+__
+    toModel(): CommonForecast
+}
+interface "ForecastApi" {
+    name: String
+    getForecast(place: CommonPlace): CommonForecast
+}
+class "LTMForecastApi"{
+    httpClient: HttpClient
+}
+class "OWMApi"{
+    httpClient: HttpClient
+}
+class "FMIApi"{
+    httpClient: HttpClient
+	xmlUtil: XML
+}
+class "SMHIApi"{
+    httpClient: HttpClient
+}
+class "NOMApi"{
+    httpClient: HttpClient
+}
+class "DMIApi"{
+    httpClient: HttpClient
+}
+
+"ForecastApi" <|.left. "LTMForecastApi"
+"ForecastApi" <|.right. "FMIApi"
+"ForecastApi" <|.up. "NOMApi"
+"ForecastApi" <|.down. "DMIApi"
+"ForecastApi" <|.down. "OWMApi"
+"ForecastApi" <|.up. "SMHIApi"
+
+"LTMForecastApi" <|--down- "LTMForecastResponse"
+"FMIApi" <|--down- "FMIForecastResponse"
+"NOMApi" <|--up- "NOMForecastResponse"
+"OWMApi" <|--down- "OWMForecastResponse"
+"SMHIApi" <|--up- "SMHIForecastResponse"
+"DMIApi" <|--down- "DMIForecastResponse"
+@enduml
+```

@@ -13,6 +13,9 @@ import com.justas.weather.core.data.network.owm.OWMApi
 import com.justas.weather.core.data.network.smhi.SMHIApi
 import com.justas.weather.core.domain.repository.ForecastRepository
 import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
@@ -72,33 +75,45 @@ object ServiceLocator {
         createHttpClient()
     }
 
-    private val xmlUtil: XML by lazy {
+    val xmlUtil: XML by lazy {
         createXmlUtil()
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     private fun createHttpClient(): HttpClient =
         HttpClient {
-            install(ContentNegotiation) {
-                json(
-                    Json {
-                        isLenient = true
-                        ignoreUnknownKeys = true
-                        useAlternativeNames = false
-                        explicitNulls = false
-                    },
-                )
-            }
-            install(Logging) {
-                logger =
-                    object : KtorLogger {
-                        override fun log(message: String) {
-                            log.v(tag = "HTTP") { message.replace("\n", " ") }
-                        }
-                    }
-                level = LogLevel.BODY
-            }
+            createHttpClientConfig()
         }
+
+    fun createHttpClient(engine: HttpClientEngine): HttpClient =
+        HttpClient(engine) {
+            createHttpClientConfig()
+        }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    private fun HttpClientConfig<*>.createHttpClientConfig() {
+        this.install(ContentNegotiation) {
+            json(
+                Json {
+                    isLenient = true
+                    ignoreUnknownKeys = true
+                    useAlternativeNames = false
+                    explicitNulls = false
+                },
+            )
+        }
+        this.install(Logging) {
+            logger =
+                object : KtorLogger {
+                    override fun log(message: String) {
+                        log.v(tag = "HTTP") { message.replace("\n", " ") }
+                    }
+                }
+            level = LogLevel.BODY
+        }
+        this.install(HttpTimeout) {
+            requestTimeoutMillis = 15000
+        }
+    }
 
     @OptIn(ExperimentalXmlUtilApi::class)
     private fun createXmlUtil(): XML =

@@ -62,13 +62,11 @@ kotlin {
 
         wasmJsMain.dependencies {
             implementation(libs.ktor.client.core)
-            implementation(libs.androidx.lifecycle.viewmodel.wasm.js)
         }
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
-            implementation(libs.androidx.lifecycle.viewmodel)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -89,16 +87,21 @@ kotlin {
             implementation(libs.xmlutil.core)
             implementation(libs.xmlutil.serialization)
             implementation(libs.bignum)
+            implementation(libs.lifecycle.viewmodel)
+        }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.ktor.client.mock)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.turbine)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
-            implementation(libs.androidx.lifecycle.viewmodel)
         }
         desktopMain.dependencies {
             implementation(libs.kotlinx.coroutines.swing)
             implementation(compose.desktop.currentOs)
             implementation(libs.ktor.client.java)
-            implementation(libs.androidx.lifecycle.viewmodel)
         }
     }
 }

@@ -1,0 +1,50 @@
+```plantuml
+@startuml
+!theme mars
+skinparam noteTextAlignment center
+
+class MainScaffold << Composable >> {
+forecastRepository: ForecastRepository
+homeTopBarViewModel: HomeTopBarViewModel
+bottomBarViewModel: BottomBarViewModel
+infoViewModel: InfoViewModel
+}
+note right of MainScaffold : A scaffold is a fundamental structure\n that provides\n a standardized platform\n for complex user interfaces.\nIt holds together the UI parts,\n such as the screen, the top bar\n and the bottom bar.
+
+class HomeScreen << Composable >> {
+    state: ForecastState
+}
+note top of HomeScreen : Consists of raw\nweather API data.
+
+class InfoScreen << Composable >> {
+    state: InfoState
+}
+note top of "InfoScreen" : Consists of aggregated,\nsummarized weather\nAPI data.
+
+class HomeTopBarView << Composable >> {
+state: HomeTopBarState
+onItemSelected: (CommonPlace?) -> Unit
+onRefresh: () -> Unit
+}
+note bottom of "HomeTopBarView" : The home screen\n top app bar.
+
+class "InfoTopBarView" << Composable >> {
+place: CommonPlace
+}
+note bottom of "InfoTopBarView" : The info screen\n top app bar.
+
+class BottomBarView << Composable >> {
+items: ImmutableList<BottomBarItem>
+selectedItem: BottomBarItem
+onItemClick: (BottomBarItem) -> Unit
+}
+note bottom of BottomBarView : The bottom\n app bar.
+
+' Main logic
+"MainScaffold" <|--down- "BottomBarView"
+"MainScaffold" <|--down- "HomeTopBarView"
+"MainScaffold" <|--down- "InfoTopBarView"
+"MainScaffold" <|--up- "HomeScreen"
+"MainScaffold" <|--up- "InfoScreen"
+@enduml
+```

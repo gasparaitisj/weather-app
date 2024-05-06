@@ -1,0 +1,64 @@
+```plantuml
+@startuml
+!theme mars
+skinparam noteTextAlignment center
+
+class "LTMPlacesApi" {
+    httpClient: HttpClient
+    getPlaces(): List<CommonPlace>
+    getPlaceByCode(code: String): CommonPlace
+}
+class "ForecastRepository" {
+    state: ForecastState
+    forecastApis: ImmutableList<ForecastApi>
+	onRefresh(place: CommonPlace)
+}
+class "HomeTopBarViewModel" << ViewModel >> {
+    state: HomeTopBarState
+    placesApi: LTMPlacesApi
+	forecastRepository: ForecastRepository
+___
+	getPlaces()
+	onPlaceSelected(place: CommonPlace?)
+}
+class "HomeTopBarState" {
+    places: PersistentList<CommonPlace>
+	selectedPlace: CommonPlace
+	isDropdownMenuExpanded: Boolean
+	dropdownMenuTextFieldValue: String
+	isLoading: Boolean
+}
+
+class MainScaffold << Composable >> {
+forecastRepository: ForecastRepository
+homeTopBarViewModel: HomeTopBarViewModel
+bottomBarViewModel: BottomBarViewModel
+infoViewModel: InfoViewModel
+}
+
+class HomeScreen << Composable >> {
+    state: ForecastState
+}
+class HomeTopBarView << Composable >> {
+state: HomeTopBarState
+onItemSelected: (CommonPlace?) -> Unit
+onRefresh: () -> Unit
+}
+
+note top of "MainScaffold" : Provides structure\nof the user interface.
+note top of "HomeTopBarView" : The home screen\ntop app bar UI component.
+note top of "HomeScreen" : Screen-level\nUI component\nthat represents raw\n weather forecast data.
+note top of "ForecastRepository" : Repository type class\nwhich combines\ndifferent forecast\nnetwork data sources.
+note right of "HomeTopBarViewModel" : A state and\nbusiness logic holder\n for HomeTopBarView\nwhich extends\nthe ViewModel class.
+note left of "LTMPlacesApi" : meteo.lt API class for loading\na list of places and\nother place information.
+note right of "HomeTopBarState" : A single state object\nfor the\nHomeTopBarViewModel.
+
+
+"MainScaffold" <|--right- "HomeScreen"
+"MainScaffold" <|--right- "HomeTopBarView"
+"MainScaffold" <|--left- "ForecastRepository"
+"MainScaffold" <|--- "HomeTopBarViewModel"
+"HomeTopBarViewModel" <|--- "HomeTopBarState"
+"HomeTopBarViewModel" <|--- "LTMPlacesApi"
+@enduml
+```

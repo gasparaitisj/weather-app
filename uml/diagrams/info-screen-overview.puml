@@ -1,0 +1,80 @@
+```plantuml
+@startuml
+!theme mars
+skinparam noteTextAlignment center
+class "ForecastRepository" {
+    state: ForecastState
+    forecastApis: ImmutableList<ForecastApi>
+	onRefresh(place: CommonPlace)
+}
+class MainScaffold << Composable >> {
+forecastRepository: ForecastRepository
+homeTopBarViewModel: HomeTopBarViewModel
+bottomBarViewModel: BottomBarViewModel
+infoViewModel: InfoViewModel
+}
+class "InfoViewModel" << ViewModel >> {
+    forecastRepository: ForecastRepository
+    collectAndUpdateIfAllForecastsAreLoaded()
+}
+class "InfoState" {
+    averageForecastItemsByDay:
+    PersistentList<\n   Triple<\n      LocalDate,\n      ImmutableList<CommonForecastItem>,\n      CommonDailyForecastItem,\n   >
+    >
+	isLoading: Boolean
+}
+class InfoScreen << Composable >> {
+    state: InfoState
+}
+class "InfoTopBarView" << Composable >> {
+place: CommonPlace
+}
+class "CommonDailyForecastItem" {
+    averageWindDirection: Double?
+	averageWindGust: Double?
+	averageWindSpeed: Double?
+	highAirTemperature: Double?
+	highCloudCover: Double?
+	highFeelsLikeTemperature: Double?
+	highRelativeHumidity: Double?
+	highSeaLevelPressure: Double?
+	highTotalPrecipitation: Double?
+	lowAirTemperature: Double?
+	lowCloudCover: Double?
+	lowFeelsLikeTemperature: Double?
+	lowRelativeHumidity: Double?
+	lowSeaLevelPressure: Double?
+	lowTotalPrecipitation: Double?
+}
+class "CommonForecastItem" {
+    airTemperature: Double?
+	cloudCover: Double?
+	condition: String
+	feelsLikeTemperature: Double?
+	instant: Instant?
+	relativeHumidity: Double?
+	seaLevelPressure: Double?
+	totalPrecipitation: Double?
+	windDirection: Double?
+	windGust: Double?
+	windSpeed: Double?
+}
+
+note right of "InfoViewModel" : A state and\nbusiness logic holder\n for InfoScreen\nwhich extends\nthe ViewModel class.
+note top of "InfoState" : A single state object\nfor the InfoViewModel.
+note top of "InfoScreen" : Screen-level\nUI component that\n represents aggregated\nweather forecast data.
+note top of "InfoTopBarView" : Top app bar\nUI component\n for InfoScreen.
+note top of "ForecastRepository" : Repository type class\nwhich combines\ndifferent forecast\nnetwork data sources.
+note top of "MainScaffold" : Provides structure\nof the user interface.
+note top of "CommonForecastItem" : Data class for representing\nweather forecast information.
+note top of "CommonDailyForecastItem" : Data class for representing daily\naggregated forecast information.
+
+"MainScaffold" <|--left- "ForecastRepository"
+"MainScaffold" <|--right- "InfoTopBarView"
+"MainScaffold" <|--right- "InfoScreen"
+"MainScaffold" <|--- "InfoViewModel"
+"InfoViewModel" <|--- "InfoState"
+"InfoState" <|--right- "CommonDailyForecastItem"
+"InfoState" <|--left- "CommonForecastItem"
+@enduml
+```

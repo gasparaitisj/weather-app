@@ -42,7 +42,6 @@ data class OWMForecastResponse(
                         windSpeed = item?.wind?.speed,
                     )
                 }.orEmpty().toPersistentList(),
-            place = city?.name.orEmpty(),
             provider = provider,
         )
     }

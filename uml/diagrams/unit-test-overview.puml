@@ -1,0 +1,64 @@
+```plantuml
+@startuml
+!theme mars
+skinparam noteTextAlignment center
+class "HomeTopBarViewModel" {
+    state: HomeTopBarState
+    placesApi: LTMPlacesApi
+	forecastRepository: ForecastRepository
+	+ getPlaces(): List<CommonPlace>
+	+ onPlaceSelected(place: CommonPlace?)
+}
+class "HomeTopBarViewModelTest" {
++ onGetPlaces_placesAreLoadedCorrectly()
++ onPlaceSelected_placeIsSelectedCorrectly()
+}
+left to right direction
+class "InfoViewModel" {
+    forecastRepository: ForecastRepository
+    - collectAndUpdateIfAllForecastsAreLoaded()
+    + init { collectAndUpdateIfAllForecastsAreLoaded() }
+}
+class "InfoViewModelTest" {
++ onInit_forecastAggregationWorksCorrectly()
+}
+class "BottomBarViewModel" {
+	state: BottomBarState
+	+ onItemSelected(item: BottomBarItem)
+}
+class "BottomBarViewModelTest" {
++ onItemSelected_itemIsSelectedCorrectly()
+}
+class "ForecastRepository" {
+    state: ForecastState
+    forecastApis: ImmutableList<ForecastApi>
+	onRefresh(place: CommonPlace)
+}
+class "ForecastRepositoryTest" {
++ onRefresh_forecastStateIsUpdatedCorrectly()
+}
+class "ToScaleString" {
++ Double?.toScaleString(scale: Long): String
+}
+class "ToScaleStringTest" {
++ test_toScaleStringScale2_isCorrect()
++ test_toScaleStringScale4_isCorrect()
+}
+class "Round" {
++ Double.round(scale: Int): Double
+}
+class "RoundTest" {
++ test_roundDownWithScale1_isCorrect()
++ test_roundUpWithScale1_isCorrect()
++ test_roundWithScale4_isCorrect()
+}
+
+"InfoViewModel" ---|> "InfoViewModelTest"
+"BottomBarViewModel" ---|> "BottomBarViewModelTest"
+"HomeTopBarViewModel" ---|> "HomeTopBarViewModelTest"
+"ForecastRepository" ---|> "ForecastRepositoryTest"
+"Round" ---|> "RoundTest"
+"ToScaleString" ---|> "ToScaleStringTest"
+
+@enduml
+```

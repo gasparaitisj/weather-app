@@ -1,0 +1,66 @@
+```plantuml
+@startuml
+!theme mars
+skinparam noteTextAlignment center
+class "ForecastRepository" {
+    state: ForecastState
+    forecastApis: ImmutableList<ForecastApi>
+	onRefresh(place: CommonPlace)
+}
+class "ForecastState" {
+    forecasts: PersistentList<CommonForecast>
+}
+class "CommonPlace" {
+    administrativeDivision: String
+	code: String
+	countryName: String
+	countryCode: String
+	name: String
+	coordinates: CommonCoordinates
+}
+class CommonForecast {
+    items: PersistentList<CommonForecastItem>
+	provider: String
+	creationDateTime: Instant? 
+	isLoading: Boolean
+	errorMessage: String
+}
+class "CommonForecastItem" {
+    airTemperature: Double? 
+	cloudCover: Double? 
+	condition: String
+	feelsLikeTemperature: Double? 
+	instant: Instant? 
+	relativeHumidity: Double? 
+	seaLevelPressure: Double? 
+	totalPrecipitation: Double? 
+	windDirection: Double? 
+	windGust: Double? 
+	windSpeed: Double? 
+}
+class "CommonCoordinates" {
+    latitude: Double? 
+	longitude: Double? 
+}
+interface "ForecastApi" {
+    name: String
+    getForecast(\nplace: CommonPlace\n): CommonForecast
+}
+
+note top of "ForecastRepository" : Repository type class\nwhich combines\ndifferent forecast\nnetwork data sources.
+note top of "CommonCoordinates" : Data class for representing\ngeographical coordinates.
+note top of "CommonPlace" : Data class for representing\nfull location information.
+note top of "ForecastState" : A single state object\nfor the ForecastRepository\nrepresenting forecast\ninformation for each API.
+note top of "CommonForecast" : Data class for representing\nfull forecast API data\ninformation.
+note top of "CommonForecastItem" : Data class for representing\nmomentary weather forecast\ninformation.
+note top of "ForecastApi" : Weather forecast API interface\nused to fetch each\nforecast API data.
+
+"CommonPlace" <|--right- "CommonCoordinates"
+"ForecastRepository" <|--right- ForecastApi
+"ForecastState" <|--- CommonForecast
+CommonForecast <|--right- "CommonForecastItem"
+
+"ForecastRepository" <|--- "CommonPlace"
+"ForecastRepository" <|--- "ForecastState"
+@enduml
+```

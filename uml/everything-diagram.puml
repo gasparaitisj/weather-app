@@ -1,0 +1,279 @@
+```plantuml
+@startuml
+annotation Serializable
+
+class "LTMForecastResponse" implements Serializable {
+    forecastCreationTimeUtc: String?
+	forecastTimestamps: List<LTMForecastTimestamp?>?
+	forecastType: String?
+	place: LTMPlace?
+__
+    toModel(): "CommonForecast"
+}
+class "DMIForecastResponse" implements Serializable {
+    domain: DMIDomain?
+	ranges: DMIRanges?
+	toModel(): "CommonForecast"
+__
+    toModel(): "CommonForecast"
+}
+class "SMHIForecastResponse" implements Serializable {
+    approvedTime: String?
+	geometry: SMHIGeometry?
+	referenceTime: String?
+	timeSeries: List<SMHITimeSeries?>?
+__
+    toModel(): "CommonForecast"
+}
+class "NOMForecastResponse" implements Serializable {
+    geometry: NOMGeometry?
+	properties: NOMProperties?
+	type: String?
+__
+    toModel(): "CommonForecast"
+}
+class "OWMForecastResponse" implements Serializable {
+    city: City?
+	cnt: Double?
+	cod: String?
+	list: List<OWMItem?>?
+	message: Double?
+__
+    toModel(): "CommonForecast"
+}
+class "FMIForecastResponse" implements Serializable {
+    member: FMIMember
+__
+    toModel(): "CommonForecast"
+}
+interface "ForecastApi" {
+    name: String
+    getForecast(place: CommonPlace): CommonForecast
+}
+class "LTMPlacesApi" {
+    httpClient: HttpClient
+}
+class "LTMForecastApi" implements "ForecastApi" {
+    httpClient: HttpClient
+}
+class "OWMApi" implements "ForecastApi" {
+    httpClient: HttpClient
+}
+class "FMIApi" implements "ForecastApi" {
+    httpClient: HttpClient
+	xmlUtil: XML
+}
+class "SMHIApi" implements "ForecastApi" {
+    httpClient: HttpClient
+}
+class "NOMApi" implements "ForecastApi" {
+    httpClient: HttpClient
+}
+class "DMIApi" implements "ForecastApi" {
+    httpClient: HttpClient
+}
+class "ForecastRepository" {
+    state: ForecastState
+    forecastApis: ImmutableList<ForecastApi>
+	onRefresh(place: CommonPlace)
+}
+class "ForecastState" {
+    forecasts: PersistentList<CommonForecast>
+}
+class "CommonPlace" {
+    administrativeDivision: String
+	code: String
+	countryName: String
+	countryCode: String
+	name: String
+	coordinates: CommonCoordinates
+}
+class "CommonDailyForecastItem" {
+    averageWindDirection: Double? 
+	averageWindGust: Double? 
+	averageWindSpeed: Double? 
+	highAirTemperature: Double? 
+	highCloudCover: Double? 
+	highFeelsLikeTemperature: Double? 
+	highRelativeHumidity: Double? 
+	highSeaLevelPressure: Double? 
+	highTotalPrecipitation: Double? 
+	lowAirTemperature: Double? 
+	lowCloudCover: Double? 
+	lowFeelsLikeTemperature: Double? 
+	lowRelativeHumidity: Double? 
+	lowSeaLevelPressure: Double? 
+	lowTotalPrecipitation: Double? 
+}
+class "CommonForecast" {
+    items: PersistentList<CommonForecastItem>
+	provider: String
+	creationDateTime: Instant? 
+	isLoading: Boolean
+	errorMessage: String
+}
+class "CommonForecastItem" {
+    airTemperature: Double? 
+	cloudCover: Double? 
+	condition: String
+	feelsLikeTemperature: Double? 
+	instant: Instant? 
+	relativeHumidity: Double? 
+	seaLevelPressure: Double? 
+	totalPrecipitation: Double? 
+	windDirection: Double? 
+	windGust: Double? 
+	windSpeed: Double? 
+}
+class "CommonCoordinates" {
+    latitude: Double? 
+	longitude: Double? 
+}
+class "HomeTopBarViewModel" {
+    state: HomeTopBarState
+    placesApi: LTMPlacesApi
+	forecastRepository: ForecastRepository
+	getPlaces(): List<CommonPlace>
+	getPlaceByCode(code: String): CommonPlace
+}
+class "HomeTopBarState" {
+    places: PersistentList<CommonPlace>
+	selectedPlace: CommonPlace
+	isDropdownMenuExpanded: Boolean
+	dropdownMenuTextFieldValue: String
+	isLoading: Boolean
+}
+class "InfoViewModel" {
+    forecastRepository: ForecastRepository
+    collectAndUpdateIfAllForecastsAreLoaded()
+}
+class "InfoState" {
+    averageForecastItemsByDay:
+    PersistentList<
+        Triple<
+        LocalDate,
+        ImmutableList<CommonForecastItem>,
+        CommonDailyForecastItem,
+        >
+    >
+	isLoading: Boolean
+}
+class "BottomBarViewModel" {
+	state: BottomBarState
+}
+class "BottomBarState" {
+    items: PersistentList<BottomBarItem>
+	selectedItem: BottomBarItem
+}
+class "BottomBarItem" {
+    name: String
+	icon: ImageVector
+	val HOME = BottomBarItem(name = "Home", icon = Icons.Default.Home)
+    val INFO = BottomBarItem(name = "Info", icon = Icons.Default.Info)
+}
+
+' Composable views
+
+class App << Composable >>
+note top of App : Every platform window implements\nthis common UI Composable.
+
+class MainActivity << Window >>
+note top of "MainActivity" : Android app container.
+
+class DesktopApp << Window >>
+note top of "DesktopApp" : Windows / macOS / Linux\ndesktop app container.
+
+class MainViewController << Window >>
+note top of "MainViewController" : iOS app container.
+
+class CanvasBasedWindow << Window >>
+note top of CanvasBasedWindow : WASM-based web app container.
+
+class MainScaffold << Composable >> {
+forecastRepository: ForecastRepository
+homeTopBarViewModel: HomeTopBarViewModel
+bottomBarViewModel: BottomBarViewModel
+infoViewModel: InfoViewModel
+}
+note top of MainScaffold : A scaffold is a fundamental structure that provides\n a standardized platform for complex user interfaces.\nIt holds together the UI parts, such as the screen, the top bar and the bottom bar.
+
+class BottomBarView << Composable >> {
+items: ImmutableList<BottomBarItem>
+selectedItem: BottomBarItem
+onItemClick: (BottomBarItem) -> Unit
+}
+note top of BottomBarView : The bottom app bar.
+
+class HomeScreen << Composable >> {
+    state: ForecastState
+}
+note top of HomeScreen : Consists of raw weather API data.
+
+class InfoScreen << Composable >> {
+    state: InfoState
+}
+note top of "InfoScreen" : Consists of aggregated, summarized weather API data.
+
+class HomeTopBarView << Composable >> {
+state: HomeTopBarState
+onItemSelected: (CommonPlace?) -> Unit
+onRefresh: () -> Unit
+}
+note top of "HomeTopBarView" : The home screen top app bar.
+
+class "InfoTopBarView" << Composable >> {
+place: CommonPlace
+}
+note top of "InfoTopBarView" : The info screen top app bar.
+
+
+' Main logic
+"MainActivity" <|--- "App"
+"DesktopApp" <|--- "App"
+"MainViewController" <|--- "App"
+"CanvasBasedWindow" <|--- "App"
+"App" <|--- "MainScaffold"
+"MainScaffold" <|--- "BottomBarView"
+"MainScaffold" <|--- "HomeScreen"
+"MainScaffold" <|--- "InfoScreen"
+"HomeScreen" <|--- "HomeTopBarView"
+"HomeScreen" <|--- "ForecastRepository"
+"InfoScreen" <|--- "InfoTopBarView"
+
+' Info logic
+"InfoTopBarView" <|--- "InfoViewModel"
+"InfoScreen" <|--- "InfoViewModel"
+"InfoViewModel" <|--- "ForecastRepository"
+"InfoViewModel" <|--- "InfoState"
+"InfoState" <|--- "CommonDailyForecastItem"
+"InfoState" <|--- "CommonForecastItem"
+
+' Places logic
+"HomeTopBarView" <|--- "HomeTopBarViewModel"
+"HomeTopBarViewModel" <|--- "HomeTopBarState"
+"HomeTopBarViewModel" <|--- "LTMPlacesApi"
+"HomeTopBarViewModel" <|--- "CommonPlace"
+"HomeTopBarViewModel" <|--- "ForecastRepository"
+"CommonPlace" <|--- "CommonCoordinates"
+
+' Bottom bar logic
+"BottomBarView" <|--- "BottomBarViewModel"
+"BottomBarViewModel" <|--- "BottomBarState"
+"BottomBarState" <|--- "BottomBarItem"
+
+' Forecast API logic.
+"ForecastState" <|--- "CommonForecast"
+"CommonForecast" <|--- "CommonForecastItem"
+
+"LTMForecastApi" <|--- "LTMForecastResponse"
+"OWMApi" <|--- "OWMForecastResponse"
+"FMIApi" <|--- "FMIForecastResponse"
+"SMHIApi" <|--- "SMHIForecastResponse"
+"NOMApi" <|--- "NOMForecastResponse"
+"DMIApi" <|--- "DMIForecastResponse"
+
+"ForecastRepository" <|--- "ForecastApi"
+"ForecastRepository" <|--- "CommonPlace"
+"ForecastRepository" <|--- "ForecastState"
+@enduml
+```

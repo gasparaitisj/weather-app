@@ -1,0 +1,44 @@
+```plantuml
+@startuml
+!theme mars
+skinparam noteTextAlignment center
+
+class MainScaffold << Composable >> {
+    forecastRepository: ForecastRepository
+    homeTopBarViewModel: HomeTopBarViewModel
+    bottomBarViewModel: BottomBarViewModel
+    infoViewModel: InfoViewModel
+}
+class "BottomBarViewModel" << ViewModel >> {
+	state: BottomBarState
+	onItemSelected(item: BottomBarItem)
+}
+note right of "BottomBarViewModel" : A state and\nbusiness logic holder\n for BottomBarView\nwhich extends\nthe ViewModel class.
+
+class "BottomBarState" {
+    items: PersistentList<BottomBarItem>
+	selectedItem: BottomBarItem
+
+	val HOME = BottomBarItem(\n   name = "Home", icon = Icons.Default.Home\n)
+    val INFO = BottomBarItem(\n   name = "Info", icon = Icons.Default.Info\n)
+}
+note right of BottomBarState : A single state object\n for the\nbottom bar view model.
+class "BottomBarItem" {
+    name: String
+	icon: ImageVector
+}
+note top of BottomBarItem : A bottom app bar\nitem consisting of\na title and an icon.
+class BottomBarView << Composable >> {
+items: ImmutableList<BottomBarItem>
+selectedItem: BottomBarItem
+onItemClick: (BottomBarItem) -> Unit
+}
+note bottom of BottomBarView : The bottom\napp bar UI view.
+
+' Bottom bar logic
+"MainScaffold" <|--- "BottomBarViewModel"
+"MainScaffold" <|--right- "BottomBarView"
+"BottomBarViewModel" <|--- "BottomBarState"
+"BottomBarState" <|--left- "BottomBarItem"
+@enduml
+```

@@ -41,8 +41,8 @@ data class LTMForecastResponse(
                         windSpeed = forecastTimestamp?.windSpeed,
                     )
                 }.orEmpty().toPersistentList(),
-            place = place?.name.orEmpty(),
             provider = provider,
+            creationDateTime = forecastCreationTimeUtc?.toInstantOrNull(),
         )
     }
 

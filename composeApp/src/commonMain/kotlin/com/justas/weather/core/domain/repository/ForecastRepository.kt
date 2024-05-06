@@ -11,6 +11,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CompletionHandler
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 
 class ForecastRepository(
     private val forecastApis: ImmutableList<ForecastApi>,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) {
     private val _state = MutableStateFlow(ForecastState())
     val state = _state.asStateFlow()
@@ -68,7 +70,7 @@ class ForecastRepository(
     }
 
     private fun fetchAllForecasts(place: CommonPlace) {
-        with(CoroutineScope(Dispatchers.Default + supervisor)) {
+        with(CoroutineScope(dispatcher + supervisor)) {
             repeat(forecastApis.size) { index ->
                 launch(exceptionHandler) {
                     loadForecast(
