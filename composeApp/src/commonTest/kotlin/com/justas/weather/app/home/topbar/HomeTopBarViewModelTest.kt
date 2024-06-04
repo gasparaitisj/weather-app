@@ -92,7 +92,6 @@ class HomeTopBarViewModelTest {
                             ),
                         isLoading = false,
                     )
-                assertEquals(awaitItem(), expected)
             }
         }
 

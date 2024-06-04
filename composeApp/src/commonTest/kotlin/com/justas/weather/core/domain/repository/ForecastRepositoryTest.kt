@@ -43,9 +43,9 @@ class ForecastRepositoryTest {
             "feelsLikeTemperature": 14.2,
             "windSpeed": 3,
             "windGust": 8,
-            "windDirection": 250,
-            "cloudCover": 48,
-            "seaLevelPressure": 1013,
+            "windDirection": 124,
+            "cloudCover": 41,
+            "seaLevelPressure": 1008,
             "relativeHumidity": 39,
             "totalPrecipitation": 0,
             "conditionCode": "partly-cloudy"

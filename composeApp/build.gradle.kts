@@ -7,6 +7,33 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.kotlinSerialization)
+    id("org.jetbrains.kotlinx.kover") version "0.7.4"
+}
+
+koverReport {
+    filters {
+        excludes {
+            classes(
+                listOf(
+                    ".*_Factory.*",
+                    "*MainKt*",
+                    "com.justas.weather.core.util.string.PrettyPrintKt",
+                    "*ComposableSingletons*",
+                ),
+            )
+            packages(
+                "weather.composeapp.generated.resources",
+                "com.justas.weather.app.main.theme",
+                "com.justas.weather.core.data.network",
+                "com.justas.weather.core.data.response",
+                "com.justas.weather.core.di",
+            )
+            annotatedBy(
+                "androidx.compose.ui.tooling.preview.Preview",
+                "androidx.compose.runtime.Composable",
+            )
+        }
+    }
 }
 
 kotlin {
@@ -129,6 +156,7 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {

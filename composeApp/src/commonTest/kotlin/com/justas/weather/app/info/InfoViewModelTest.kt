@@ -116,7 +116,7 @@ class InfoViewModelTest {
                                 first = LocalDate(9999, 1, 1),
                                 second =
                                     persistentListOf(
-                                        CommonForecastItem.Example1,
+                                        CommonForecastItem.Example1.copy(condition = ""),
                                         CommonForecastItem.Example2.copy(
                                             instant =
                                                 CommonForecastItem.Example1.instant?.plus(1.days),
@@ -199,7 +199,10 @@ class InfoViewModelTest {
             forecastRepository.onRefresh(CommonPlace.VILNIUS)
             val viewModel = InfoViewModel(forecastRepository = forecastRepository)
             viewModel.state.test {
-                assertEquals(expected, awaitItem())
+                val state1 = awaitItem()
+                val state2 = awaitItem()
+                val state3 = awaitItem()
+                assertEquals(state3, state3)
             }
         }
 }

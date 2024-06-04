@@ -136,6 +136,6 @@ class ForecastRepository(
 
     private fun PersistentList<CommonForecastItem>.filterUpToDate() =
         filter { item ->
-            item.instant != null && item.instant.isAfter((-1).hours)
+            item.instant != null && item.instant.isAfter(2.hours)
         }.toPersistentList()
 }
